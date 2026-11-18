@@ -4,6 +4,12 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.1.1] - 2026-11-18
+
+### Removed
+
+- 删除 `templates/skill/`。新技能暂不按统一规范编写，模板用不上；`docs/skill-spec.md` 与 `scripts/check-skills.mjs` 保留，作字段参考和校验用。
+
 ## [0.1.0] - 2026-11-18
 
 ### Added

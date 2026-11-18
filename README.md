@@ -20,7 +20,6 @@
 │   ├── guizang-ppt/
 │   ├── html-ppt/
 │   └── ppt-master/
-├── templates/skill/         新技能模板，复制改名即可用
 ├── scripts/                 校验脚本与清单生成脚本
 ├── docs/                    技能规范、版本策略、发布清单
 ├── .github/                 PR 模板与 CI 校验
@@ -60,7 +59,7 @@ node scripts/sync-index.mjs       # 重新生成 skills/skills.json
 
 ## 新增或更新技能
 
-1. 复制 `templates/skill/` 到 `skills/<name>/`。
+1. 按 [docs/skill-spec.md](docs/skill-spec.md) 建目录，至少放 `SKILL.md`、`META.json`、`PROVENANCE.md`、`CHANGELOG.md` 四个文件。
 2. 改 `SKILL.md` 的 `name` 和 `description`，`META.json` 的版本号、许可证、上游。
 3. 在 `CHANGELOG.md` 顶部加一条同版本号的记录。
 4. 跑 `node scripts/check-skills.mjs`，再跑 `node scripts/sync-index.mjs`。
