@@ -116,7 +116,7 @@ for (const skill of entries) {
     err(skill, '标记为可分发，但没有许可证');
   }
   if (meta.license === 'UNLICENSED') {
-    warn(skill, '许可证未声明，公开仓库前必须处理（见 NOTICE.md）');
+    warn(skill, '许可证未声明，仓库已公开，需补许可或移除该目录（见 NOTICE.md）');
   }
   if (existsSync(join(dir, 'LICENSE')) === false && meta.license && meta.license !== 'UNLICENSED') {
     warn(skill, `META.json 声明 ${meta.license}，但目录内没有 LICENSE 文件`);

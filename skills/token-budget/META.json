@@ -1,0 +1,11 @@
+{
+  "name": "token-budget",
+  "version": "0.1.0",
+  "entry": "SKILL.md",
+  "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify，并可用 A/B 验证是否真省。",
+  "license": "MIT",
+  "redistributable": true,
+  "upstream": null,
+  "importedAt": "2026-11-18",
+  "importedFrom": "自研，依据 docs/节省token技能-调研与整合方案.md"
+}

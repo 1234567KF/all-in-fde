@@ -4,6 +4,26 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.2.0] - 2026-11-18
+
+### Added
+
+- `scripts/sync-runtime.mjs`：仓库副本 `skills/` 与运行时 `.dsh/skills/` 单向同步，支持 `--check`、`--pull`、`--global`、`--prune`，跳过依赖与运行产物，遇到目录联接不写入。
+- `.githooks/post-commit`：提交后自动同步运行时，`git config core.hooksPath .githooks` 启用。
+- `.tmp/` 统一临时目录，配套 `scripts/clean-tmp.mjs`（预览 / `--all` / `--older-than` / `--legacy`）。
+- `docs/runtime-sync.md`：同步规则、跳过清单、联接处理、反向同步说明。
+- 归档 `token-budget` 0.1.0。
+
+### Changed
+
+- 临时脚本与测试产物从 `archive/scratch/` 迁到 `.tmp/legacy/`；`archive/` 只留归档文档和引用资料。
+- `.gitignore` 增加测试产物规则（`test-output/`、`coverage/`、`__snapshots__/`、`artifacts/` 等）。
+- 仓库改为公开，`README` 与 `NOTICE.md` 更新为公开后的状态。
+
+### Notes
+
+- `dashi-ppt` 与 `ai-flavor-guard` 仍无许可证，现已随公开仓库分发，需尽快补许可或移除。
+
 ## [0.1.1] - 2026-11-18
 
 ### Removed

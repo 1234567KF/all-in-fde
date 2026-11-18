@@ -5,6 +5,7 @@
 | 技能 | 版本 | 许可证 | 上游 | 说明 |
 | --- | --- | --- | --- | --- |
 | [ai-flavor-guard](ai-flavor-guard/) | 0.1.0 | 未声明 | 本地自研 | 控制中文文本的 AI 味词汇 |
+| [token-budget](token-budget/) | 0.1.0 | MIT | 自研 | Token 预算：plan / brief / squeeze / verify |
 | [dashi-ppt](dashi-ppt/) | 0.4.14 | 未声明 | 本地安装包 | 预置主题的 HTML 演示，可导出 PPTX / PDF |
 | [guizang-ppt](guizang-ppt/) | 0.1.0 | AGPL-3.0 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) | 单文件网页 PPT，两套视觉风格 |
 | [html-ppt](html-ppt/) | 0.1.0 | MIT | [lewislulu/html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) | 静态 HTML 演示，主题与版式可组合 |

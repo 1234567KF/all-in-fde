@@ -44,7 +44,12 @@ chore(skills): 同步 skills.json
 ```powershell
 node scripts/check-skills.mjs
 node scripts/sync-index.mjs
+node scripts/sync-runtime.mjs --check
 git status --short
 ```
 
 `check-skills.mjs` 报错时不要提交。缺许可证记为警告，标记 `redistributable: true` 却没有许可证才是错误；两类情况都记在 [NOTICE.md](NOTICE.md)。
+
+`sync-runtime.mjs --check` 有差异时说明 `.dsh/skills` 落后了，跑一次不带参数的命令补上。装了 `.githooks/post-commit` 之后这步由提交钩子自动完成，规则见 [docs/runtime-sync.md](docs/runtime-sync.md)。
+
+临时产物写进 `.tmp/`，不要留在技能目录或仓库根；清理用 `node scripts/clean-tmp.mjs`。

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "totalSkills": 5,
-  "totalFiles": 13862,
-  "totalBytes": 100658075,
+  "totalSkills": 6,
+  "totalFiles": 13880,
+  "totalBytes": 100713307,
   "skills": [
     {
       "name": "ai-flavor-guard",
@@ -72,6 +72,18 @@
       "files": 13217,
       "bytes": 44253562,
       "sha256": "2e3c279a9a5bab0ff84dca09db85e8069f5d9b3d9dd26a1f783ca37c6e39a3c5"
+    },
+    {
+      "name": "token-budget",
+      "version": "0.1.0",
+      "license": "MIT",
+      "redistributable": true,
+      "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify，并可用 A/B 验证是否真省。",
+      "entry": "SKILL.md",
+      "upstream": null,
+      "files": 18,
+      "bytes": 55232,
+      "sha256": "205d652f2ec0bab44b0db317c8879cf3301af8be6c60563f4676508f63c2298c"
     }
   ]
 }
