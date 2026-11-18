@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "totalSkills": 5,
+  "totalFiles": 13862,
+  "totalBytes": 100658075,
+  "skills": [
+    {
+      "name": "ai-flavor-guard",
+      "version": "0.1.0",
+      "license": "UNLICENSED",
+      "redistributable": false,
+      "description": "按文体与语境控制中文文本的 AI 味词汇，生成或改写长文前加载。",
+      "entry": "SKILL.md",
+      "upstream": null,
+      "files": 9,
+      "bytes": 80473,
+      "sha256": "ad2826e92a576f93804fceaf5eb96ce385ffe04a0a36c05501ec89a1656b92f7"
+    },
+    {
+      "name": "dashi-ppt",
+      "version": "0.4.14",
+      "license": "UNLICENSED",
+      "redistributable": false,
+      "description": "按预置视觉主题组合页面，生成可离线打开、可在浏览器编辑的 HTML 演示，支持导出 PPTX 与 PDF。",
+      "entry": "SKILL.md",
+      "upstream": null,
+      "files": 348,
+      "bytes": 39176415,
+      "sha256": "598ae7c23d66fae2cb563cac2f0624888c92b982eac90e6fa5fe49020e3db6e9"
+    },
+    {
+      "name": "guizang-ppt",
+      "version": "0.1.0",
+      "license": "AGPL-3.0",
+      "redistributable": true,
+      "description": "生成横向翻页的网页 PPT（单 HTML 文件），含 WebGL 背景、演讲者视图、观众屏同步和两套视觉风格。",
+      "entry": "SKILL.md",
+      "upstream": {
+        "url": "https://github.com/op7418/guizang-ppt-skill",
+        "version": null
+      },
+      "files": 46,
+      "bytes": 6219322,
+      "sha256": "b5adfa943c943b988fac493252fb3ea559f1265a51ed9c80188d6664a593977e"
+    },
+    {
+      "name": "html-ppt",
+      "version": "0.1.0",
+      "license": "MIT",
+      "redistributable": true,
+      "description": "用静态 HTML 写演示文稿：一套主题、一套版式、一组动画，按模板组合页面，支持键盘翻页。",
+      "entry": "SKILL.md",
+      "upstream": {
+        "url": "https://github.com/lewislulu/html-ppt-skill",
+        "version": null
+      },
+      "files": 242,
+      "bytes": 10928303,
+      "sha256": "f8f87d478c01082aa632a375049b127475900cf558849274d1668f9e8e0a80b5"
+    },
+    {
+      "name": "ppt-master",
+      "version": "6.9.0",
+      "license": "MIT",
+      "redistributable": true,
+      "description": "按路由生成可编辑 PPTX：重建页面视觉、维护品牌与版式工作区、填充原生模板、增强成品，支持旁白与动画。",
+      "entry": "SKILL.md",
+      "upstream": {
+        "url": "https://github.com/hugohe3/ppt-master",
+        "version": "6.9.0"
+      },
+      "files": 13217,
+      "bytes": 44253562,
+      "sha256": "2e3c279a9a5bab0ff84dca09db85e8069f5d9b3d9dd26a1f783ca37c6e39a3c5"
+    }
+  ]
+}

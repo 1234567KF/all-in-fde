@@ -1,0 +1,19 @@
+name: validate-skills
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 校验技能元数据
+        run: node scripts/check-skills.mjs
+      - name: 校验索引是否同步
+        run: node scripts/sync-index.mjs --check

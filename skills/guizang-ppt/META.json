@@ -1,0 +1,14 @@
+{
+  "name": "guizang-ppt",
+  "version": "0.1.0",
+  "entry": "SKILL.md",
+  "description": "生成横向翻页的网页 PPT（单 HTML 文件），含 WebGL 背景、演讲者视图、观众屏同步和两套视觉风格。",
+  "license": "AGPL-3.0",
+  "redistributable": true,
+  "upstream": {
+    "url": "https://github.com/op7418/guizang-ppt-skill",
+    "version": null
+  },
+  "importedAt": "2026-11-18",
+  "importedFrom": "D:\\all-in-fde\\.dsh\\skills\\guizang-ppt"
+}

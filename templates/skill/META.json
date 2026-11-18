@@ -1,0 +1,11 @@
+{
+  "name": "example-skill",
+  "version": "0.1.0",
+  "entry": "SKILL.md",
+  "description": "一句话说明这个技能做什么。",
+  "license": "MIT",
+  "redistributable": true,
+  "upstream": null,
+  "importedAt": "YYYY-MM-DD",
+  "importedFrom": ""
+}

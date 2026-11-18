@@ -1,0 +1,14 @@
+{
+  "name": "html-ppt",
+  "version": "0.1.0",
+  "entry": "SKILL.md",
+  "description": "用静态 HTML 写演示文稿：一套主题、一套版式、一组动画，按模板组合页面，支持键盘翻页。",
+  "license": "MIT",
+  "redistributable": true,
+  "upstream": {
+    "url": "https://github.com/lewislulu/html-ppt-skill",
+    "version": null
+  },
+  "importedAt": "2026-11-18",
+  "importedFrom": "D:\\all-in-fde\\.dsh\\skills\\html-ppt"
+}

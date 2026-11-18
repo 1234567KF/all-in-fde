@@ -1,0 +1,11 @@
+{
+  "name": "ai-flavor-guard",
+  "version": "0.1.0",
+  "entry": "SKILL.md",
+  "description": "按文体与语境控制中文文本的 AI 味词汇，生成或改写长文前加载。",
+  "license": "UNLICENSED",
+  "redistributable": false,
+  "upstream": null,
+  "importedAt": "2026-11-18",
+  "importedFrom": "D:\\all-in-fde\\.dsh\\skills\\ai-flavor-guard"
+}

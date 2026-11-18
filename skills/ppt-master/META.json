@@ -1,0 +1,14 @@
+{
+  "name": "ppt-master",
+  "version": "6.9.0",
+  "entry": "SKILL.md",
+  "description": "按路由生成可编辑 PPTX：重建页面视觉、维护品牌与版式工作区、填充原生模板、增强成品，支持旁白与动画。",
+  "license": "MIT",
+  "redistributable": true,
+  "upstream": {
+    "url": "https://github.com/hugohe3/ppt-master",
+    "version": "6.9.0"
+  },
+  "importedAt": "2026-11-18",
+  "importedFrom": "D:\\all-in-fde\\.dsh\\skills\\ppt-master"
+}
