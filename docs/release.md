@@ -21,6 +21,7 @@ GitHub 单文件上限 100 MB，仓库建议 1 GB 以内。当前快照约 115 M
 ## 3 敏感信息
 
 - [ ] 全仓搜 `password`、`token`、`secret`、`api_key`、`192.168.`、`10.`、`localhost:` 等内网地址。
+- [ ] `node scripts/check-public-artifacts.mjs` 退出 0：对外产物（技能、模板、生成器）无内网地址、本地路径、内部项目名。
 - [ ] 检查 `META.json` 的 `importedFrom` 是否包含本机用户名和绝对路径；公开前改写成相对描述。
 - [ ] `.env`、密钥、证书类文件确认没有入库。
 

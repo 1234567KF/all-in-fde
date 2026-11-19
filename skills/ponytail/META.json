@@ -1,0 +1,15 @@
+{
+  "name": "ponytail",
+  "version": "5.3.3",
+  "entry": "SKILL.md",
+  "description": "写实现代码或重构时加载：最小完整改动，先复用现成能力，再写新代码。",
+  "license": "MIT",
+  "redistributable": true,
+  "upstream": {
+    "url": "https://github.com/DietrichGebert/ponytail",
+    "version": "5.3.3",
+    "commit": "main@2026-11-18"
+  },
+  "importedAt": "2026-11-18",
+  "importedFrom": "https://raw.githubusercontent.com/DietrichGebert/ponytail/main/.openclaw/skills/ponytail/SKILL.md"
+}

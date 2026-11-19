@@ -1,0 +1,15 @@
+{
+  "name": "rea-video",
+  "version": "0.1.0",
+  "entry": "SKILL.md",
+  "description": "逆向拆解一条视频是怎么做出来的：逐镜头判断实拍 / AI 生成 / 3D / 代码渲染，拆字幕包装、人声与音效，并给出复刻方案。",
+  "license": "Apache-2.0",
+  "redistributable": true,
+  "upstream": {
+    "url": "https://github.com/JuneYaooo/rea-video",
+    "version": "0.1.0",
+    "commit": "e2acf601d212c63f9662cca58177588c2ba26006"
+  },
+  "importedAt": "2026-11-18",
+  "importedFrom": "https://raw.githubusercontent.com/JuneYaooo/rea-video/main/skills/rea-video"
+}

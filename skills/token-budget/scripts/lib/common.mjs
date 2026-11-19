@@ -1,24 +1,13 @@
 /** 共用工具：路径、参数、峰谷、任务分类。无第三方依赖。 */
 import { existsSync, readFileSync, mkdirSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { dirname, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { dshCostHome, dshCostReportsDir, repoRoot, tokenBudgetRoot } from './dsh-cost.mjs';
 
-export const skillRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-
-function findRepoRoot(start) {
-  let dir = start;
-  for (let i = 0; i < 8; i += 1) {
-    if (existsSync(join(dir, 'tools', 'dsh-cost', 'pricing.json'))) return dir;
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return resolve(start, '..', '..');
-}
-
-export const repoRoot = findRepoRoot(skillRoot);
-export const dshCostRoot = join(repoRoot, 'tools', 'dsh-cost');
+export { repoRoot };
+export const skillRoot = tokenBudgetRoot;
+export const dshCostRoot = dshCostHome;
 
 export function parseCli(argv) {
   const opts = { _: [] };
@@ -90,8 +79,11 @@ export function classifyTask(text) {
 }
 
 export async function peakContext(now = Date.now()) {
-  const priceFile = join(dshCostRoot, 'pricing.json');
-  const priceModule = join(dshCostRoot, 'src', 'price.mjs');
+  if (!dshCostHome) {
+    return { available: false, peak: null, label: 'dsh-cost 未安装（运行 scripts/install.mjs）', nextIdle: null };
+  }
+  const priceFile = join(dshCostHome, 'pricing.json');
+  const priceModule = join(dshCostHome, 'src', 'price.mjs');
   if (!existsSync(priceFile) || !existsSync(priceModule)) {
     return { available: false, peak: null, label: '价格表不可用', nextIdle: null };
   }
@@ -149,7 +141,8 @@ export function latestContextTokens() {
 }
 
 export function recentAverage() {
-  const file = join(dshCostRoot, 'reports', 'summary.json');
+  if (!dshCostReportsDir) return null;
+  const file = join(dshCostReportsDir, 'summary.json');
   if (!existsSync(file)) return null;
   try {
     const data = readJson(file);

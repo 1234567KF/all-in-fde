@@ -1,0 +1,11 @@
+{
+  "name": "all-in-fde",
+  "version": "0.1.0",
+  "entry": "SKILL.md",
+  "description": "把一段需求推进到可验收的小型 IT 系统：填需求采集表 → 拆票 → PRD/原型 → 逐票实现自测 → 冷启动验收 → 交付。",
+  "license": "MIT",
+  "redistributable": true,
+  "upstream": null,
+  "importedAt": "2026-11-18",
+  "importedFrom": "自研，依据 docs/all-in-fde-v1-实现方案.md"
+}

@@ -1,0 +1,113 @@
+{
+  "_note": "v2 多 provider 价格表。单价单位：token 模型=元或美元/百万 tokens；media=元或美元/张。改价只需改这里，历史 token/张数不变，金额重算。",
+  "version": "2026-11-18",
+  "displayCurrency": "CNY",
+  "fx": {
+    "CNY": 1,
+    "USD": 7.1,
+    "_note": "只影响显示；单价按各自 currency 记录。USD 汇率按你实际结算价改。"
+  },
+  "providerAliases": {
+    "deepseek-api-key": "deepseek-account",
+    "deepseek": "deepseek-account"
+  },
+  "peakRule": {
+    "timezone": "Asia/Shanghai",
+    "weekdays": [1, 2, 3, 4, 5],
+    "windows": [["09:00", "12:00"], ["14:00", "18:00"]],
+    "holidays": [],
+    "_note": "仅 deepseek-account 使用峰谷价；其他 provider 把 peak 与 idle 写成相同值即可。法定节假日请填入 YYYY-MM-DD，否则只会高估、不会低估。"
+  },
+  "providers": {
+    "deepseek-account": {
+      "models": {
+        "deepseek-flash": {
+          "label": "DeepSeek-V4.1-Flash-1017",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.04, "miss": 2.0, "write": 0, "output": 8.0 },
+          "idle": { "hit": 0.02, "miss": 1.0, "write": 0, "output": 4.0 }
+        },
+        "deepseek-v4-pro": {
+          "label": "DeepSeek-V4-Pro-0813",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.3, "miss": 9.0, "write": 0, "output": 27.0 },
+          "idle": { "hit": 0.15, "miss": 4.5, "write": 0, "output": 13.5 }
+        }
+      },
+      "aliases": {
+        "deepseek-v4-flash": "deepseek-flash",
+        "deepseek-v4-flash-vision-exp": "deepseek-flash",
+        "deepseek-v4.1-flash": "deepseek-flash"
+      }
+    },
+    "minimax-cn": {
+      "models": {
+        "MiniMax-M3.1-Flash": {
+          "label": "MiniMax-M3.1-Flash",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
+          "idle": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 }
+        },
+        "MiniMax-M3": {
+          "label": "MiniMax-M3（≤512k 五折档）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.42, "miss": 2.1, "write": 0, "output": 8.4 },
+          "idle": { "hit": 0.42, "miss": 2.1, "write": 0, "output": 8.4 },
+          "tiers": [
+            {
+              "above": 512000,
+              "peak": { "hit": 0.84, "miss": 4.2, "output": 16.8 },
+              "idle": { "hit": 0.84, "miss": 4.2, "output": 16.8 }
+            }
+          ]
+        }
+      }
+    },
+    "minimax": {
+      "models": {
+        "MiniMax-M3.1-Flash": {
+          "label": "MiniMax-M3.1-Flash (intl)",
+          "currency": "USD",
+          "billing": "token",
+          "peak": { "hit": 0.015, "miss": 0.15, "write": 0, "output": 0.6 },
+          "idle": { "hit": 0.015, "miss": 0.15, "write": 0, "output": 0.6 }
+        },
+        "MiniMax-M2.7": {
+          "label": "MiniMax-M2.7 (intl)",
+          "currency": "USD",
+          "billing": "token",
+          "peak": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
+          "idle": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 }
+        }
+      }
+    },
+    "*": {
+      "models": {}
+    }
+  },
+  "media": {
+    "minimax-cn/image-01": {
+      "label": "MiniMax Image-01",
+      "currency": "CNY",
+      "billing": "image",
+      "variants": { "default": null },
+      "_note": "按张计费；把 null 改成控制台单价（元/张）。不同分辨率可加 1k/2k/4k 变体。"
+    },
+    "minimax-cn/h3-image": {
+      "label": "MiniMax H3 Image",
+      "currency": "CNY",
+      "billing": "image",
+      "variants": { "1k": null, "2k": null, "4k": null },
+      "_note": "H3 按分辨率档计价，填入每档单价后 record 时带 --variant 1k/2k/4k。"
+    }
+  },
+  "extras": {
+    "web_search_per_call": 0.005,
+    "web_fetch_per_call": 0.005,
+    "ocr_per_page": 0.0015
+  }
+}

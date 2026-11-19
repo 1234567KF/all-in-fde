@@ -7,6 +7,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { dshCostRoot, parseCli, printJson, readJson } from './lib/common.mjs';
+import { requireDshCost } from './lib/dsh-cost.mjs';
 
 async function loadModules() {
   const pricePath = join(dshCostRoot, 'src', 'price.mjs');
@@ -48,6 +49,7 @@ function loadMedia() {
 }
 
 async function main() {
+  requireDshCost();
   const cli = parseCli(process.argv.slice(2));
   const task = String(cli.task || cli._[0] || '').trim();
   if (!task) {

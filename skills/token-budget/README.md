@@ -55,28 +55,81 @@ skills/token-budget/
     squeeze.mjs
     verify.mjs
     install.mjs
+    doctor.mjs
+    package.mjs
+    sync-vendor.mjs
     selftest.mjs
     lib/common.mjs
+    lib/dsh-cost.mjs
+  vendor/dsh-cost/          # 技能自带依赖副本（由 sync-vendor 生成）
 ```
+
+## 与计费工具 `dsh-cost` 的关系
+
+计费**不是**技能，是独立的本地工具 `dsh-cost`；但本技能把它作为**依赖绑定**，不是“可有可无”。
+
+依赖解析顺序：
+
+1. `DSH_COST_HOME` 环境变量
+2. `~/.dsh/dsh-cost`（`install.mjs` 安装到这里）
+3. `tools/dsh-cost`（本仓库开发目录）
+4. `skills/token-budget/vendor/dsh-cost`（技能自带副本，免克隆安装用）
+
+数据在 dsh-cost 目录下的 `data/`、`reports/`；安装到 `~/.dsh/dsh-cost` 后，账本和报表也在那里，不写进技能目录。
+
+| 本技能动作 | 用到 dsh-cost 什么 | 没有 dsh-cost 时 |
+| --- | --- | --- |
+| `plan` | `pricing.json` 判峰谷；`reports/summary.json` 取历史均价 | 峰谷显示“不可用”，预算只有轮次参考 |
+| `verify` | 账本 + A/B 统计 | 报错，提示先安装/同步 |
+| `squeeze` / `brief` | 不用 | 正常工作 |
+
+反过来，**没有 token-budget，dsh-cost 仍可单独用**：直接跑 `sync`/`report` 即可。
 
 ## 依赖
 
 - Node.js 18+
-- 可选：`tools/dsh-cost`（峰谷、历史均价、A/B）；缺失时 `plan` 降级，`verify` 提示先同步。
+- `dsh-cost`：通过 `install.mjs` 安装，或用 `DSH_COST_HOME` 指向一个已有目录
 
-## 安装到 DSH
+## 安装（含 dsh-cost 依赖）
 
 ```powershell
+# 先看会装到哪
+node skills/token-budget/scripts/install.mjs --dry-run
+
+# 安装 dsh-cost 到 ~/.dsh/dsh-cost，并挂载技能
 node skills/token-budget/scripts/install.mjs
+
+# 检查绑定
+node skills/token-budget/scripts/doctor.mjs
 ```
 
-移除联接（不删技能目录）：
+安装会：
+
+- 把 dsh-cost 的 `bin/src/bench/scripts/pricing.json` 复制到 `~/.dsh/dsh-cost`；
+- 如果目标没有账本/报表，把当前 `data/`、`reports/` 迁移过去；
+- 把技能挂到 `.dsh/skills/token-budget`（没有 `.dsh` 时跳过，复制技能目录即可）。
+
+可选参数：`--home DIR` 改安装位置；`--remove` 只移除技能联接，不删 dsh-cost 和数据。
+
+## 免克隆安装包
 
 ```powershell
-node skills/token-budget/scripts/install.mjs --remove
+node skills/token-budget/scripts/package.mjs
 ```
 
-重启 DSH 或等技能目录刷新后，`token-budget` 会出现在技能列表里。
+生成 `dist/token-budget-<version>/`，里面自带 `vendor/dsh-cost`，复制到任意机器后：
+
+```powershell
+node scripts/install.mjs
+```
+
+不需要克隆 all-in-fde，也不需要 `tools/`。
+
+`vendor/dsh-cost` 是 `tools/dsh-cost` 的代码副本，不含账本/报表。改了 dsh-cost 后运行：
+
+```powershell
+node skills/token-budget/scripts/sync-vendor.mjs
+```
 
 ## 给 all-in-fde 入口的接入方式
 

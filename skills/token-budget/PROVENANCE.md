@@ -5,7 +5,7 @@
 | 项 | 内容 |
 | --- | --- |
 | 技能名 | `token-budget` |
-| 版本 | 0.1.0 |
+| 版本 | 0.2.0 |
 | 上游 | 自研 |
 | 上游版本 | — |
 | 创建日期 | 2026-11-18 |
@@ -28,7 +28,7 @@
 ## 依赖
 
 - Node.js 18+（脚本无第三方依赖）
-- 可选：`tools/dsh-cost`（峰谷判断、历史均价、A/B 验证）；缺失时 `plan` 降级，`verify` 提示先同步。
+- dsh-cost：通过 `scripts/install.mjs` 安装到 `~/.dsh/dsh-cost`；`scripts/lib/dsh-cost.mjs` 按 `DSH_COST_HOME` → `~/.dsh/dsh-cost` → `tools/dsh-cost` → `vendor/dsh-cost` 解析。`scripts/package.mjs` 会把 dsh-cost 一起打进免克隆安装包。
 
 ## 设计取舍
 

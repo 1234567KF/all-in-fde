@@ -103,14 +103,10 @@ if (skills.length === 0) {
 const totals = { copied: 0, unchanged: 0, extras: 0, pruned: 0, links: 0 };
 const rows = [];
 
-for (const skill of skills) {
-  const srcDir = join(srcRoot, skill);
-  const dstDir = join(dstRoot, skill);
-
+function syncOne(labelName, srcDir, dstDir) {
   const dstStat = existsSync(dstDir) ? lstatSync(dstDir) : null;
   if (dstStat && dstStat.isSymbolicLink()) {
-    rows.push({ skill, skipped: true, reason: '运行时目录是链接（联接 / 符号链接），不写入', copied: 0, unchanged: 0, extras: 0, actions: [] });
-    continue;
+    return { skill: labelName, skipped: true, reason: '运行时目录是链接（联接 / 符号链接），不写入', copied: 0, unchanged: 0, extras: 0, actions: [] };
   }
 
   const { files: srcFiles, links } = walk(srcDir);
@@ -170,7 +166,27 @@ for (const skill of skills) {
   totals.links += links.length;
   totals.pruned += prune && !dryRun ? extras.length : 0;
 
-  rows.push({ skill, copied, unchanged, extras: extras.length, actions, links });
+  return { skill: labelName, copied, unchanged, extras: extras.length, actions, links };
+}
+
+for (const skill of skills) {
+  rows.push(syncOne(skill, join(srcRoot, skill), join(dstRoot, skill)));
+}
+
+// 第二个同步面：bundles/（插件 bundle，如子代理预设）与 skills/ 同进同出。
+const repoBundles = join(repoRoot, 'bundles');
+const runtimeBundles = join(dirname(dstRoot), 'bundles');
+const bundlesSrc = pull ? runtimeBundles : repoBundles;
+const bundlesDst = pull ? repoBundles : runtimeBundles;
+
+if (existsSync(bundlesSrc)) {
+  const names = readdirSync(bundlesSrc, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && !SKIP.has(e.name))
+    .map((e) => e.name)
+    .sort();
+  for (const name of names) {
+    rows.push(syncOne(`bundles/${name}`, join(bundlesSrc, name), join(bundlesDst, name)));
+  }
 }
 
 const label = pull ? '运行时 -> 仓库' : '仓库 -> 运行时';

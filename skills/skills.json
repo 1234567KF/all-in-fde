@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "totalSkills": 6,
-  "totalFiles": 13880,
-  "totalBytes": 100713307,
+  "totalSkills": 9,
+  "totalFiles": 13943,
+  "totalBytes": 101017115,
   "skills": [
     {
       "name": "ai-flavor-guard",
@@ -15,6 +15,18 @@
       "files": 9,
       "bytes": 80473,
       "sha256": "ad2826e92a576f93804fceaf5eb96ce385ffe04a0a36c05501ec89a1656b92f7"
+    },
+    {
+      "name": "all-in-fde",
+      "version": "0.1.0",
+      "license": "MIT",
+      "redistributable": true,
+      "description": "把一段需求推进到可验收的小型 IT 系统：填需求采集表 → 拆票 → PRD/原型 → 逐票实现自测 → 冷启动验收 → 交付。",
+      "entry": "SKILL.md",
+      "upstream": null,
+      "files": 19,
+      "bytes": 67318,
+      "sha256": "0413f6ef7edc266363a58017ad2c82bab299a3465741f5765e80e68ed9f71aad"
     },
     {
       "name": "dashi-ppt",
@@ -59,6 +71,22 @@
       "sha256": "f8f87d478c01082aa632a375049b127475900cf558849274d1668f9e8e0a80b5"
     },
     {
+      "name": "ponytail",
+      "version": "5.3.3",
+      "license": "MIT",
+      "redistributable": true,
+      "description": "写实现代码或重构时加载：最小完整改动，先复用现成能力，再写新代码。",
+      "entry": "SKILL.md",
+      "upstream": {
+        "url": "https://github.com/DietrichGebert/ponytail",
+        "version": "5.3.3",
+        "commit": "main@2026-11-18"
+      },
+      "files": 6,
+      "bytes": 9690,
+      "sha256": "39cc80cacc7a20acd7d08213cc73103e6a1bd2da507f383f4341dfc50d70ce8e"
+    },
+    {
       "name": "ppt-master",
       "version": "6.9.0",
       "license": "MIT",
@@ -74,16 +102,32 @@
       "sha256": "2e3c279a9a5bab0ff84dca09db85e8069f5d9b3d9dd26a1f783ca37c6e39a3c5"
     },
     {
-      "name": "token-budget",
+      "name": "rea-video",
       "version": "0.1.0",
+      "license": "Apache-2.0",
+      "redistributable": true,
+      "description": "逆向拆解一条视频是怎么做出来的：逐镜头判断实拍 / AI 生成 / 3D / 代码渲染，拆字幕包装、人声与音效，并给出复刻方案。",
+      "entry": "SKILL.md",
+      "upstream": {
+        "url": "https://github.com/JuneYaooo/rea-video",
+        "version": "0.1.0",
+        "commit": "e2acf601d212c63f9662cca58177588c2ba26006"
+      },
+      "files": 19,
+      "bytes": 101507,
+      "sha256": "125f87e046f80744659e51b17cee99108f524aaabda39d3e85556a7a79f0c0ed"
+    },
+    {
+      "name": "token-budget",
+      "version": "0.2.0",
       "license": "MIT",
       "redistributable": true,
-      "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify，并可用 A/B 验证是否真省。",
+      "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify；依赖 dsh-cost，可免克隆安装。",
       "entry": "SKILL.md",
       "upstream": null,
-      "files": 18,
-      "bytes": 55232,
-      "sha256": "205d652f2ec0bab44b0db317c8879cf3301af8be6c60563f4676508f63c2298c"
+      "files": 37,
+      "bytes": 180525,
+      "sha256": "60ae7f0dd0ac78fff3f5cc8d7784ee81e7b7d9da5087397f39e7d2abf8f0c20f"
     }
   ]
 }

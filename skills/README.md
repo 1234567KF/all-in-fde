@@ -5,11 +5,14 @@
 | 技能 | 版本 | 许可证 | 上游 | 说明 |
 | --- | --- | --- | --- | --- |
 | [ai-flavor-guard](ai-flavor-guard/) | 0.1.0 | 未声明 | 本地自研 | 控制中文文本的 AI 味词汇 |
-| [token-budget](token-budget/) | 0.1.0 | MIT | 自研 | Token 预算：plan / brief / squeeze / verify |
+| [token-budget](token-budget/) | 0.2.0 | MIT | 自研 | Token 预算：plan / brief / squeeze / verify |
 | [dashi-ppt](dashi-ppt/) | 0.4.14 | 未声明 | 本地安装包 | 预置主题的 HTML 演示，可导出 PPTX / PDF |
 | [guizang-ppt](guizang-ppt/) | 0.1.0 | AGPL-3.0 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) | 单文件网页 PPT，两套视觉风格 |
 | [html-ppt](html-ppt/) | 0.1.0 | MIT | [lewislulu/html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) | 静态 HTML 演示，主题与版式可组合 |
 | [ppt-master](ppt-master/) | 6.9.0 | MIT | [hugohe3/ppt-master](https://github.com/hugohe3/ppt-master) | 可编辑 PPTX 生成与页面重建 |
+| [ponytail](ponytail/) | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 写代码时的最小完整改动，先复用再新写 |
+| [all-in-fde](all-in-fde/) | 0.1.0 | 未声明 | 本地自研 | 把一段需求推进到可验收的小型 IT 系统 |
+| [rea-video](rea-video/) | 0.1.0 | Apache-2.0 | [JuneYaooo/rea-video](https://github.com/JuneYaooo/rea-video) | 逆向拆解视频：逐镜判断实拍 / AI / 代码渲染，拆声音与包装，给复刻方案 |
 
 ## 每个目录里的文件
 

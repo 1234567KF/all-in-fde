@@ -4,9 +4,19 @@
 
 ## 当前状态
 
-- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签 `v0.1.0`、`v0.1.1`。
-- 6 个技能纳入版本控制；`skills/` 与运行时 `.dsh/skills/` 由脚本同步，不再各改各的。
+- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.3.0`。
+- 9 个技能纳入版本控制；`skills/` 与运行时 `.dsh/skills/` 由脚本同步，不再各改各的。
 - **`dashi-ppt` 和 `ai-flavor-guard` 没有许可证，但已经随仓库公开**。这是当前最需要处理的事，见 [NOTICE.md](NOTICE.md)。
+
+## 安装
+
+一条命令把技能落到目标路径，落完即可用，不用 clone 全仓：
+
+```powershell
+npx giget@latest gh:1234567KF/all-in-fde/skills "<项目路径>\.dsh\skills"
+```
+
+全局安装、单个技能、更新与卸载，见 [INSTALL.md](INSTALL.md)。
 
 ## 目录结构
 
@@ -15,12 +25,16 @@
 ├── skills/                  技能本体，一个技能一个目录
 │   ├── README.md            技能索引
 │   ├── skills.json          机器可读清单：版本、许可、上游、指纹
+│   ├── all-in-fde/          入口技能
 │   ├── ai-flavor-guard/
 │   ├── token-budget/
+│   ├── ponytail/
+│   ├── rea-video/
 │   ├── dashi-ppt/
 │   ├── guizang-ppt/
 │   ├── html-ppt/
 │   └── ppt-master/
+├── bundles/fde-presets/     DSH 子代理预设（fde-lead / fde-worker / fde-qa）
 ├── scripts/                 校验、索引生成、运行时同步、临时目录清理
 ├── .githooks/               提交后自动同步运行时的钩子
 ├── docs/                    技能规范、版本策略、发布清单、运行时同步说明
@@ -36,8 +50,11 @@
 
 | 技能 | 版本 | 许可证 | 上游 |
 | --- | --- | --- | --- |
+| `all-in-fde` | 0.1.0 | MIT | 自研（入口技能） |
 | `ai-flavor-guard` | 0.1.0 | 未声明 | 本地自研 |
-| `token-budget` | 0.1.0 | MIT | 自研（预算层） |
+| `token-budget` | 0.2.0 | MIT | 自研（预算层） |
+| `ponytail` | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
+| `rea-video` | 0.1.0 | Apache-2.0 | [JuneYaooo/rea-video](https://github.com/JuneYaooo/rea-video) |
 | `dashi-ppt` | 0.4.14 | 未声明 | 本地安装包 |
 | `guizang-ppt` | 0.1.0 | AGPL-3.0 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) |
 | `html-ppt` | 0.1.0 | MIT | [lewislulu/html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) |
@@ -64,20 +81,21 @@ $git config core.hooksPath .githooks
 
 ## 常用命令
 
-本机没有全局 git，用的是 MinGit：
+需要 Node.js 18 及以上，以及一个可用的 `git`：
 
 ```powershell
-$git = 'C:\Users\KF\.qoder\bin\git\cmd\git.exe'
-& $git status
-& $git log --oneline --decorate
-& $git tag -n
+git status
+git log --oneline --decorate
+git tag -n
 ```
 
-校验技能元数据与索引（需要 Node.js 18 及以上）：
+校验与索引：
 
 ```powershell
-node scripts/check-skills.mjs     # 只读检查，异常时退出码非 0
-node scripts/sync-index.mjs       # 重新生成 skills/skills.json
+node scripts/check-skills.mjs            # 元数据与索引一致性
+node scripts/sync-index.mjs              # 重新生成 skills/skills.json
+node scripts/check-links.mjs             # Markdown 相对链接
+node scripts/check-public-artifacts.mjs  # 对外产物里不许有内网地址、本机路径
 ```
 
 ## 临时产物
@@ -98,9 +116,11 @@ node scripts/clean-tmp.mjs --legacy --all     # 连根目录旧式 .tmp-* 一起
 1. 按 [docs/skill-spec.md](docs/skill-spec.md) 建目录，至少放 `SKILL.md`、`META.json`、`PROVENANCE.md`、`CHANGELOG.md` 四个文件。
 2. 改 `SKILL.md` 的 `name` 和 `description`，`META.json` 的版本号、许可证、上游。
 3. 在 `CHANGELOG.md` 顶部加一条同版本号的记录。
-4. 跑 `node scripts/check-skills.mjs`，再跑 `node scripts/sync-index.mjs`。
+4. 跑 `node scripts/check-skills.mjs`、`node scripts/check-links.mjs`、`node scripts/check-public-artifacts.mjs`，再跑 `node scripts/sync-index.mjs`。
 5. 跑 `node scripts/sync-runtime.mjs` 把改动推给 `.dsh/skills`。
 6. 提交，格式见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+技能目录必须自包含：需要外部依赖的，把依赖放进技能自己的子目录（例如 `token-budget/vendor/dsh-cost`），不要引用仓库外的路径——`giget` 只下载 `skills/` 时，仓库其他部分不在场。
 
 ## 许可证
 

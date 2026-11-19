@@ -2,12 +2,12 @@
 name: token-budget
 description: Token 预算与节省策略。用户提到 token-budget、省 token、预算、成本、节省，或 all-in-fde 入口任务开始时加载；先判断类型、峰谷和读取策略，再按 playbook 执行，并可用 A/B 验证是否真省。
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # token-budget
 
-all-in-fde 任务和长任务的预算层。领域技能管内容，本技能管流程、预算和验收。all-in-fde 入口尚不存在时，也可以单独使用。
+预算层。领域技能管内容，本技能管流程和验收；入口不存在时也可单独用。
 
 ## 第一步
 
@@ -60,4 +60,6 @@ node "<Base directory>/scripts/plan.mjs" --task "<用户原话>" --json
 
 ## 文件
 
-`references/policy.md`（决策表/压缩矩阵）、`references/playbook-{doc,code,ppt,research}.md`、`scripts/{plan,brief,squeeze,verify,install}.mjs`。细节按需读，不要整包塞进上下文。
+`references/policy.md`（决策表/压缩矩阵）、`references/playbook-{doc,code,ppt,research}.md`、`scripts/{plan,brief,squeeze,verify,install,doctor,package,sync-vendor}.mjs`、`vendor/dsh-cost/`。细节按需读，不要整包塞进上下文。
+
+绑定 dsh-cost；先跑 `scripts/doctor.mjs` 检查。

@@ -8,8 +8,10 @@
  */
 import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { basename, extname, join } from 'node:path';
-import { dshCostRoot, ensureDir, parseCli, printJson, readText, stripBom, writeText } from './lib/common.mjs';
+import { dshCostDataDir } from './lib/dsh-cost.mjs';
+import { ensureDir, parseCli, printJson, readText, stripBom, writeText } from './lib/common.mjs';
 
 const LEVELS = {
   light: { maxLines: 200, maxLine: 800, jsonDepth: 6, arraySample: 8, stringLimit: 300 },
@@ -210,7 +212,9 @@ export function compressJson(text, levelName = 'medium') {
 }
 
 function storeRoot() {
-  return process.env.ALL_IN_FDE_SQUEEZE_DIR || join(dshCostRoot, 'data', 'squeeze');
+  if (process.env.ALL_IN_FDE_SQUEEZE_DIR) return process.env.ALL_IN_FDE_SQUEEZE_DIR;
+  if (dshCostDataDir) return join(dshCostDataDir, 'squeeze');
+  return join(tmpdir(), 'token-budget-squeeze');
 }
 
 export function storeOriginal({ source, original, compressed, type, level }) {

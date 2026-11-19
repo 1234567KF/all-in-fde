@@ -1,0 +1,21 @@
+{
+  "_note": "质量门判定。compare 用 task|arm|run 读取。accepted=false 表示该次交付需要返工，返工成本应另跑一轮并继续打同一个 task 标签。",
+  "judgments": [
+    {
+      "task": "doc-review-01",
+      "arm": "A",
+      "run": "1",
+      "accepted": true,
+      "score": 8.5,
+      "note": "P0 全中，P1 漏 1 条"
+    },
+    {
+      "task": "doc-review-01",
+      "arm": "B",
+      "run": "1",
+      "accepted": true,
+      "score": 8.0,
+      "note": "少一条误报，但多花了一次追问"
+    }
+  ]
+}

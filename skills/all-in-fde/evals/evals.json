@@ -1,0 +1,34 @@
+{
+  "skill_name": "all-in-fde",
+  "trigger_evals": [
+    { "query": "我想要个能管合同的东西，能录入合同、经理审批、批完通知我，我不会写代码", "should_trigger": true },
+    { "query": "帮我把这个需求变成一个能用的系统", "should_trigger": true },
+    { "query": "继续上次那个合同管理的项目", "should_trigger": true },
+    { "query": "我要一个内部用的台账，能登记、能查、能导出", "should_trigger": true },
+    { "query": "这是产品给的一期需求文档和原型，帮我归档并开发这个模块", "should_trigger": true },
+    { "query": "我们要把线下的认证评审流程搬到线上", "should_trigger": true },
+    { "query": "React 和 Vue 哪个适合这个项目", "should_trigger": false },
+    { "query": "帮我写一份 PPT，讲这个方案", "should_trigger": false },
+    { "query": "给现有项目的用户表加一个字段", "should_trigger": false },
+    { "query": "帮我审阅这份 50 页的长文", "should_trigger": false },
+    { "query": "做个多模块电商 MVP，后端要多代理并行开发", "should_trigger": false },
+    { "query": "解释一下这段代码为什么报错", "should_trigger": false }
+  ],
+  "delivery_evals": [
+    {
+      "id": "contract",
+      "prompt": "我要一个合同管理：录入合同、经理审批、审批结果通知发起人。我不会写代码。",
+      "expect": "可登录、可增删改查合同、审批后状态变生效并通知、门禁全绿、含一份数据断言（金额/状态）"
+    },
+    {
+      "id": "ledger",
+      "prompt": "做个内部台账，登记客户信息，能筛选、能导出 Excel。",
+      "expect": "登录可用、台账增删改查与筛选、导出文件可打开、门禁全绿"
+    },
+    {
+      "id": "approval",
+      "prompt": "把一个简单的报销审批流做成系统：提交 → 主管批 → 财务核销。",
+      "expect": "三态流转正确、非法流转被拒、金额核销正确、E2E 走通主链"
+    }
+  ]
+}

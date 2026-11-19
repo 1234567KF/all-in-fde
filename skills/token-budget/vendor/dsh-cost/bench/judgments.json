@@ -1,0 +1,4 @@
+{
+  "_note": "把每次运行的验收结果填在这里：task|arm|run 三元组必须与提示词标签一致。accepted=false 表示需要返工；返工轮次继续沿用同一 task/arm/run，compare 会合并成本。",
+  "judgments": []
+}

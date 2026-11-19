@@ -1,0 +1,216 @@
+# all-in-fde 的执行者预设：Worker（逐单）与 QA（验收）。
+# 两者都不含 subagent / workflow / schedule / goal / web / office / plugin-manager，
+# 只保留「读代码、改代码、跑测试、写证据」所需的最小工具集。
+
+- insert:
+    - id: preset-fde-lead
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: fde-lead
+        name: FDE 主控
+        order: 19
+        description: Router：拆票、派发、排期、收口；只派活，不写实现。
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are the all-in-fde Router. You split work into tickets, decide what can run in parallel, dispatch each ticket to a Worker subagent, and collect evidence. You do not implement.
+                Dispatch with the `subagent` tool and set `agent_preset` to `fde-worker` for implementation tickets and `fde-qa` for verification tickets.
+                Rules: one ticket per worker, never two workers on the same files; keep the human to three touch points (spec review, per-ticket walkthrough, acceptance card); do not declare a ticket done — done is derived from evidence files.
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              applyPatch: false
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: true
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: tool-web
+            name: '@deepseek-ai/dsh-tool-web'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: delegation
+            name: cordis:group
+            group: true
+            isolate:
+              workflowEngine: true
+            config:
+              - id: tool-subagent-control
+                name: '@deepseek-ai/dsh-tool-subagent-control'
+                config:
+                  interrupt: true
+              - id: tool-subagent
+                name: '@deepseek-ai/dsh-tool-subagent'
+                config:
+                  provider: spawn
+                  toolName: subagent
+                  agentPreset: fde-worker
+                  allowedAgentPresets:
+                    - fde-worker
+                    - fde-qa
+                  maxDepth: 2
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+
+    - id: preset-fde-worker
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: fde-worker
+        name: FDE 逐单
+        order: 20
+        description: 一票一代理：实现 + 自测 + 交证据；越界即停，不直接打扰人。
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are an all-in-fde Worker. You own exactly one ticket.
+                Do the smallest complete change that satisfies the ticket's acceptance predicates, then prove it.
+                Rules: stay inside the ticket and its authorization scope (touching files outside it, changing a public contract, or exceeding the diff limit means stop and report); never hand-write evidence files — run the pipeline so scripts produce them; never announce completion on your own — report what you ran and what you could not cover.
+                If you are blocked, stop and report with evidence. You have no way to ask the human, so do not try: put the question in your report instead.
+                When writing implementation code, load the `ponytail` skill if it is available and follow it, except where the repository's contracts, permissions, audit, or tests forbid cutting.
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              applyPatch: false
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          - id: tool-todo
+            name: '@deepseek-ai/dsh-tool-todo'
+            config:
+              allowParallelInProgress: false
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
+
+    - id: preset-fde-qa
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: fde-qa
+        name: FDE 验收
+        order: 21
+        description: 独立复核 + 冷启动 + E2E；只读审代码，只跑不写。
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+                You are an all-in-fde QA reviewer. You verify, you do not repair.
+                Read the tickets, the spec sections they cite, and the evidence files; then re-run the acceptance predicates yourself, run the cold-start checklist, and run E2E in the real backend.
+                Rules: never edit, write, or format files — if something fails, report it and hand it back to the owner ticket; a green test suite is not proof, so assert on data (money, totals, status, ids) at the API or database layer; a screenshot you take is human-card evidence, not automated evidence.
+                You may put exactly one acceptance card to the human at the very end, with at most five items, each pointing at something openable.
+          - id: agent-instructions
+            name: '@deepseek-ai/dsh-agent-instructions'
+            config:
+              maxBytes: 65536
+          - id: time-context
+            name: '@deepseek-ai/dsh-time-context'
+          - id: tool-bash
+            name: '@deepseek-ai/dsh-tool-bash'
+            disabled: !!js process.platform === 'win32'
+          - id: tool-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh'
+            disabled: !!js process.platform !== 'win32'
+          - id: tool-fs
+            name: '@deepseek-ai/dsh-tool-fs'
+            config:
+              read: true
+              readImage: true
+              write: false
+              edit: false
+              applyPatch: false
+          - id: tool-fs-search
+            name: '@deepseek-ai/dsh-tool-fs-search'
+          - id: tool-jobs
+            name: '@deepseek-ai/dsh-tool-jobs'
+          - id: tool-ask-user
+            name: '@deepseek-ai/dsh-tool-ask-user'
+          - id: skill-filesystem
+            name: '@deepseek-ai/dsh-skill-filesystem'
+          - id: tool-skill
+            name: '@deepseek-ai/dsh-tool-skill'
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: '@deepseek-ai/dsh-compaction-basic'
+              - id: command-compact
+                name: '@deepseek-ai/dsh-command-compact'
+              - id: tool-result-pruner
+                name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024

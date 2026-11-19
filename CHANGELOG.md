@@ -4,6 +4,27 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.3.0] - 2026-11-19
+
+### Added
+
+- 入口技能 `all-in-fde` 0.1.0：七份 reference、三个脚本（E0 自检 / 票据检查 / 证据校验）、需求采集表模板、评测集。
+- 技能 `ponytail` 5.3.3、`rea-video` 0.1.0。
+- `bundles/fde-presets`：`fde-lead` / `fde-worker` / `fde-qa` 三个 DSH 子代理预设。
+- [INSTALL.md](INSTALL.md)：用 `giget` 只取 `skills/` 子目录，一条命令落到项目级或全局 `.dsh/skills`，含更新、卸载与验证。
+- `scripts/check-links.mjs`（Markdown 相对链接）与 `scripts/check-public-artifacts.mjs`（内网地址、本机路径、内部项目名）。
+- `token-budget` 0.2.0：自带 `vendor/dsh-cost`，新增 `doctor.mjs`、`package.mjs`、`sync-vendor.mjs`。
+
+### Changed
+
+- 技能目录改为自包含：安装后不再需要仓库里的其他文件，`giget` 只下载 `skills/` 也能直接用。
+- `token-budget/scripts/install.mjs`：技能已经位于 `.dsh/skills` 时跳过目录联接，不再生成嵌套的 `.dsh/.dsh`。
+- README 去掉本机 MinGit 绝对路径，补安装段、新技能与预设计算目录。
+
+### Removed
+
+- 删除 `dist/` 构建产物（`package.mjs` 可随时重新生成）与文档工具中间产物目录。
+
 ## [0.2.0] - 2026-11-18
 
 ### Added
