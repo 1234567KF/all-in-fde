@@ -45,7 +45,7 @@ This project is AI-Native. Follow these guidelines when modifying or creating co
 ## 模板仓库专属规则（scaffold 生成项目会剥离本段）
 
 - **本仓库是脚手架模板本身，部署级别无状态**：self-deploy 用 [compose.self.yml](compose.self.yml)（`/app/data` 挂 tmpfs，容器重建即空库；空库执行 `init.sql` 时自动补齐 7 条演示通知，生成项目走 drizzle 迁移不会种）。生成项目用 `compose.test.yml` 的 `./data` 持久卷，不受本规则影响。
-- **预发布形态只属于生成项目**：[compose.preprod.yml](compose.preprod.yml) 是 `./data` 持久卷 + 外网机从 Registry 拉取，模板自身**不启用**（`PREPROD_HOST` 保持 `REPLACE_ME`），否则违反上一条无状态规则。启用方式与外网机准备见 [ci-guide.md §10](skills/project-scaffolder/references/ci-guide.md)。
+- **预发布形态只属于生成项目**：[compose.preprod.yml](compose.preprod.yml) 是 `./data` 持久卷 + 外网机从 Registry 拉取，模板自身**不启用**（`PREPROD_HOST` 保持 `REPLACE_ME`），否则违反上一条无状态规则。启用方式与外网机准备见 [ci-guide.md §10](tools/scaffolder/references/ci-guide.md)。
 - **模板不提交迁移脚本**：数据库结构唯一来源是 [schema.ts](apps/api/src/db/schema.ts)，生成单份 [init.sql](apps/api/init.sql)。修改 schema 后运行 `bun --filter api db:init:generate`；禁止在模板里 `db:generate`（守卫会拒绝）。
 - **生成项目相反**：scaffold 会删除 `init.sql` 并生成 drizzle baseline，此后用 `bun --filter api db:generate` / `bun --filter api db:migrate` 正常升级。
 - 模板 `migrate:check` 校验 `init.sql` 与 `schema.ts` 一致；生成项目 `migrate:check` 校验迁移 journal/snapshot/drift。

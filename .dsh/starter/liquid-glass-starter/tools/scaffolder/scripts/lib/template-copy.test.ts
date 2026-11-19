@@ -75,18 +75,18 @@ describe("模板专属文件：规划表 / 部署配置 / 技能目录不复制"
     }
   })
 
-  it("排除技能目录与团队目录，但不误伤别处同名目录", () => {
+  it("排除脚手架工具目录与团队目录，但不误伤别处同名目录", () => {
     for (const rel of [
-      "skills",
-      "skills/project-scaffolder/SKILL.md",
+      "tools",
+      "tools/scaffolder/SKILL.md",
       ".team",
       ".team/impl-plan.md",
       "skills.json",
     ]) {
       expect(isExcludedFromTemplate(rel)).toBe(true)
     }
-    expect(isExcludedFromTemplate("apps/web/skills")).toBe(false)
-    expect(isExcludedFromTemplate("apps/web/skills/foo.ts")).toBe(false)
+    expect(isExcludedFromTemplate("apps/web/tools")).toBe(false)
+    expect(isExcludedFromTemplate("apps/web/tools/foo.ts")).toBe(false)
   })
 })
 

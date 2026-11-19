@@ -1,7 +1,7 @@
 # 模块化与可插拔架构详细设计（Modular & Pluggable Architecture）
 
 > **文档状态**：Revised v2 — Ready for Implementation  
-> **适用范围**：`liquid-glass-starter` 模板仓库、脚手架（`skills/project-scaffolder/scripts/scaffold.ts`）、业务模块生成器（`scripts/gen-module.ts`）  
+> **适用范围**：`liquid-glass-starter` 模板仓库、脚手架（`tools/scaffolder/scripts/scaffold.ts`）、业务模块生成器（`scripts/gen-module.ts`）  
 > **核心目标**：在 **保持静态类型推导、Tree-shaking 与 AST 架构门禁** 的前提下，实现「系统可选特性（审计查看器 / 消息中心 / 演示）初始化一键干净剥离」与「业务领域模块 `gen:module` ⇄ `remove:module` 对称增删」。
 
 ---

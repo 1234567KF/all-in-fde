@@ -32,7 +32,7 @@
     "test:eslint": "bun test eslint-rules/ --parallel",
     "test:api": "cd apps/api && bun test src/",
     "test:api:coverage": "cd apps/api && bun test src/ --coverage",
-    "test:scripts": "bun test scripts/ skills/project-scaffolder/scripts/ --parallel",
+    "test:scripts": "bun test scripts/ tools/scaffolder/scripts/ --parallel",
     "imports:prune": "bun run scripts/prune-unused-imports.ts",
     "test:web": "bun run scripts/run-web-task.ts test",
     "test:coverage": "bun run scripts/run-web-task.ts test:coverage",

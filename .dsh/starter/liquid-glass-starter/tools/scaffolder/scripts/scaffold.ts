@@ -309,7 +309,7 @@ if (!fs.existsSync(path.join(templateCachePath, "package.json"))) {
 }
 console.log(`📦 使用本机模板：${templateCachePath}`)
 // ── 技能自更新 ───────────────────────────────────────────────────────────────
-// 缓存刚 clone/pull 完，里面的 skills/project-scaffolder 就是与本次模板
+// 缓存刚 clone/pull 完，里面的 tools/scaffolder 就是与本次模板
 // **同源同提交**的最新技能，直接复制即可，不需要再走一次 giget（再拉一次可能拿到
 // 另一个提交，技能与它即将使用的模板就不同源了）。
 //

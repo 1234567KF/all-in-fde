@@ -32,7 +32,7 @@ export const TEMPLATE_EXCLUDED_BASENAMES = new Set([
 ])
 
 /** 只按根相对路径排除的目录（basename 同名但在别处的目录不受影响）。 */
-const TEMPLATE_EXCLUDED_ROOT_PATHS = ["skills", "apps/api/data"]
+const TEMPLATE_EXCLUDED_ROOT_PATHS = ["tools", "apps/api/data"]
 
 /** docs/ 下唯一允许进入生成项目的条目；其余一律排除。 */
 const DOCS_KEPT = ["docs/auth.md", "docs/specs"]

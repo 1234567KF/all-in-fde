@@ -1,7 +1,7 @@
 /**
  * 技能自更新：把**正在运行的这份技能**同步到模板缓存里的版本。
  *
- * 自包含约束：skill 官方安装方式是 `npx giget .../skills/project-scaffolder`，
+ * 自包含约束：skill 官方安装方式是 `npx giget .../tools/scaffolder`，
  * 只安装 skill 子树，因此本文件不得 import skill 目录之外的任何相对路径。
  *
  * 纯文件操作，不打印、不退出：跳过条件、变更清单与 exit 3 重启协议都由调用方

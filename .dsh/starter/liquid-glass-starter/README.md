@@ -32,16 +32,16 @@
 
 ```bash
 # EditorX
-npx giget gh:example-org/project-scaffolder ~/.editor-config/skills/project-scaffolder --force
+npx giget gh:example-org/project-scaffolder ~/.editor-config/tools/scaffolder --force
 
 # EditorX CN
-npx giget gh:example-org/project-scaffolder ~/.editor-config-cn/skills/project-scaffolder --force
+npx giget gh:example-org/project-scaffolder ~/.editor-config-cn/tools/scaffolder --force
 
 # Claude Code
-npx giget gh:example-org/project-scaffolder ~/.claude/skills/project-scaffolder --force
+npx giget gh:example-org/project-scaffolder ~/.claude/tools/scaffolder --force
 
 # Gemini / Antigravity
-npx giget gh:example-org/project-scaffolder ~/.gemini/config/plugins/project-scaffolder-plugin/skills/project-scaffolder --force
+npx giget gh:example-org/project-scaffolder ~/.gemini/config/plugins/project-scaffolder-plugin/tools/scaffolder --force
 ```
 
 <details>
@@ -51,32 +51,32 @@ npx giget gh:example-org/project-scaffolder ~/.gemini/config/plugins/project-sca
 
 ```powershell
 # EditorX
-npx giget gh:example-org/project-scaffolder "$HOME\.editor-config\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "$HOME\.editor-config\tools\scaffolder" --force
 
 # EditorX CN
-npx giget gh:example-org/project-scaffolder "$HOME\.editor-config-cn\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "$HOME\.editor-config-cn\tools\scaffolder" --force
 
 # Claude Code
-npx giget gh:example-org/project-scaffolder "$HOME\.claude\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "$HOME\.claude\tools\scaffolder" --force
 
 # Gemini / Antigravity
-npx giget gh:example-org/project-scaffolder "$HOME\.gemini\config\plugins\project-scaffolder-plugin\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "$HOME\.gemini\config\plugins\project-scaffolder-plugin\tools\scaffolder" --force
 ```
 
 #### Windows (CMD - 命令提示符)
 
 ```cmd
 REM EditorX
-npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.editor-config\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.editor-config\tools\scaffolder" --force
 
 REM EditorX CN
-npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.editor-config-cn\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.editor-config-cn\tools\scaffolder" --force
 
 REM Claude Code
-npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.claude\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.claude\tools\scaffolder" --force
 
 REM Gemini / Antigravity
-npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.gemini\config\plugins\project-scaffolder-plugin\skills\project-scaffolder" --force
+npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.gemini\config\plugins\project-scaffolder-plugin\tools\scaffolder" --force
 ```
 
 </details>
@@ -98,7 +98,7 @@ npx giget gh:example-org/project-scaffolder "%USERPROFILE%\.gemini\config\plugin
 确保本地已安装 [Bun](https://bun.sh/) 后，可直接调用脚手架脚本：
 
 ```bash
-bun run skills/project-scaffolder/scripts/scaffold.ts \
+bun run tools/scaffolder/scripts/scaffold.ts \
   --name "my-project-name" \
   --target "/absolute/path/to/my-project" \
   --type "monorepo" \      # 可选: monorepo | flat-go | flat-java (Kotlin)
@@ -757,7 +757,7 @@ docker compose -f compose.yml up -d --build
 
 `main → pre-prod → prod` 必须**逐级 Fast-Forward**（勿 Squash / Merge commit），SHA 相等是镜像同源的唯一保障；且要**等 main 流水线跑绿再 FF 到 pre-prod**——`needs:project` 不等待运行中的流水线，抢跑会取到上一次成功的产物并被同源断言拦下。不配 `PREPROD_HOST` 时流水线与双分支模型完全一致，模板仓库自身保持关闭。
 
-启用顺序、外网机准备（`docker login` + `data` 目录归属 + 手工 `.env`；CI 会在**远端**校验 `.env`，拒绝缺键、`admin123` / 示例占位密码与非 production 模式，且不回传文件内容）、排错与回滚见 [ci-guide.md §10](skills/project-scaffolder/references/ci-guide.md)。清单与规则漂移由 `bun test scripts/ci-manifest.test.ts` 守护。
+启用顺序、外网机准备（`docker login` + `data` 目录归属 + 手工 `.env`；CI 会在**远端**校验 `.env`，拒绝缺键、`admin123` / 示例占位密码与非 production 模式，且不回传文件内容）、排错与回滚见 [ci-guide.md §10](tools/scaffolder/references/ci-guide.md)。清单与规则漂移由 `bun test scripts/ci-manifest.test.ts` 守护。
 
 ---
 

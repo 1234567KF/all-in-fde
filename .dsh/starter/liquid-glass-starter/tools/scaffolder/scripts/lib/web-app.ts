@@ -1,7 +1,7 @@
 /**
  * 新增 Web 端的**参数形状校验**（`--mode add-web` 与 init 多端共用）。
  *
- * 自包含约束：skill 官方安装方式是 `npx giget .../skills/project-scaffolder`，
+ * 自包含约束：skill 官方安装方式是 `npx giget .../tools/scaffolder`，
  * 只安装 skill 子树，因此本文件不得 import skill 目录之外的任何相对路径。
  *
  * 增端的机械部分（克隆默认端 / 改身份 / 写注册区块）在**目标项目**的

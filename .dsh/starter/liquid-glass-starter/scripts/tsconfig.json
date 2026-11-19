@@ -29,6 +29,6 @@
     "*.ts",
     "lib/*.ts",
     "gen-module/*.ts",
-    "../skills/project-scaffolder/scripts/**/*.ts"
+    "../tools/scaffolder/scripts/**/*.ts"
   ]
 }

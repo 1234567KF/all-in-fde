@@ -23,7 +23,7 @@
 
 ```bash
 # 1) 生成 flat 项目（脚本优先使用本地模板缓存 ~/liquid-glass-starter）
-bun run skills/project-scaffolder/scripts/scaffold.ts \
+bun run tools/scaffolder/scripts/scaffold.ts \
   --name demo-flat \
   --target /tmp/demo-flat \
   --type flat-go \
@@ -83,7 +83,7 @@ flat-java 与 flat-go 走同一段 flat 转换逻辑，问题一致；`--db none
 
 ## 4. 根因分析
 
-相关代码：[scaffold.ts](../skills/project-scaffolder/scripts/scaffold.ts)
+相关代码：[scaffold.ts](../tools/scaffolder/scripts/scaffold.ts)
 
 ### 4.1 flat 转换步骤（约 L695–L720）
 
@@ -102,10 +102,10 @@ flat-java 与 flat-go 走同一段 flat 转换逻辑，问题一致；`--db none
 
 | #   | 问题                                                                                                                                                                                                                           | 现状                                                                                                  |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| 1   | flat 后端只有 `/api/hello`（[go main.go.template L21](../skills/project-scaffolder/templates/go/main.go.template)、[kotlin App.kt.template L19](../skills/project-scaffolder/templates/kotlin/App.kt.template)） | 即使前端修到可编译，所有业务页 API 仍 404，只是「能编译的空壳」                                       |
+| 1   | flat 后端只有 `/api/hello`（[go main.go.template L21](../tools/scaffolder/templates/go/main.go.template)、[kotlin App.kt.template L19](../tools/scaffolder/templates/kotlin/App.kt.template)） | 即使前端修到可编译，所有业务页 API 仍 404，只是「能编译的空壳」                                       |
 | 2   | `--include-ci` 仅支持 monorepo（scaffold 约 L1190 显式警告跳过）                                                                                                                                                               | flat 生成项目无 CI / Docker / 测试端口能力                                                            |
 | 3   | 根 `eslint.config.js` 被删除，但 frontend 仍用 monorepo 脚本                                                                                                                                                                   | `bun run lint` 必失败（见证据 4）                                                                     |
-| 4   | 文档仍把 flat-go / flat-java 当作正式可选项（README「备用方案」、[SKILL.md](../skills/project-scaffolder/SKILL.md) Style B 段落）                                                                                       | 与真实可用性不符，易误导入                                                                            |
+| 4   | 文档仍把 flat-go / flat-java 当作正式可选项（README「备用方案」、[SKILL.md](../tools/scaffolder/SKILL.md) Style B 段落）                                                                                       | 与真实可用性不符，易误导入                                                                            |
 | 5   | 多端注册表（`web-apps.json`）落地后，`apps/web/vite.config.ts` / `vitest.config.ts` 会 `import { readWebApp } from "../../scripts/lib/web-apps.js"`                                                                            | flat 把前端搬到 `frontend/` 后该相对路径指向项目外，dev/build/test 均在加载配置阶段就失败             |
 | 6   | 前端分包后 `packages/` 被 flat 分支整体删除（scaffold 约 L925），但源码里 `@workspace/ui/*` / `@workspace/web-core/*` 是 workspace 依赖而非别名                                                                                | 所有 UI 原语与登录内核 import 全部无法解析；flat 若要复活，必须先决定这两个包是保留还是回退成宿主别名 |
 | 7   | flat 的 `clean-demo` 把 bypass 版 `ProtectedRoute.tsx` 写到 `<webRoot>/router/`，而该组件已迁到 `packages/web-core/src/router/`                                                                                                | 写出的文件无人 import，真正生效的仍是带鉴权的内核版；无后端时页面会被重定向到不存在的登录接口         |
@@ -167,10 +167,10 @@ flat-java 与 flat-go 走同一段 flat 转换逻辑，问题一致；`--db none
 
 ## 9. 相关代码与文档索引
 
-- flat 转换：`skills/project-scaffolder/scripts/scaffold.ts`（flat 分支、删除 packages/根配置、install/build 分支、`--include-ci` 限制）
+- flat 转换：`tools/scaffolder/scripts/scaffold.ts`（flat 分支、删除 packages/根配置、install/build 分支、`--include-ci` 限制）
 - 前端契约依赖：[apps/web/package.json](../apps/web/package.json)（`"shared": "*"`）、[packages/shared](../packages/shared)
-- 后端最小模板：`skills/project-scaffolder/templates/go/main.go.template`、`templates/kotlin/App.kt.template`
-- 审计日志联动策略（已实施）：[README.md](../README.md) 脚手架规则说明、[SKILL.md](../skills/project-scaffolder/SKILL.md)
+- 后端最小模板：`tools/scaffolder/templates/go/main.go.template`、`templates/kotlin/App.kt.template`
+- 审计日志联动策略（已实施）：[README.md](../README.md) 脚手架规则说明、[SKILL.md](../tools/scaffolder/SKILL.md)
 - 批次计划参考：[docs/ai-native-enhancement-plan.md](./ai-native-enhancement-plan.md)（Batch 5/6 与本文档无关，可插队修 flat）
 
 ## 10. 处理状态

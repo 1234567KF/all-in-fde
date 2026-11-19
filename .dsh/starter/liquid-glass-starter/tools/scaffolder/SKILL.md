@@ -148,7 +148,7 @@ The helper script initializes the Git repository and makes the first commit. Ver
 1. **monorepo 生成项目**：`scaffold --type monorepo` 产物 `bun run check` 全绿（typecheck + lint + migrate:check + arch:check + test）。
 2. **特性组合**：分别以 `--clean-notifications true` / `--clean-audit-log true` / `--clean-demo true` 及其组合生成项目，产物 `bun run check` 全绿，且全仓 grep 不到 `feature:*` region 标记；Tier 0 的 `apps/api/src/modules/log/`、`shared/notification.ts` 写入内核、`notifications`/`audit_logs` 表仍在。
 3. **gen→remove 往返**：生成项目内 `bun run gen:module --name contract --label "合同" --skip-db` → commit → `bun run remove:module --name contract --skip-db --force` 后，`git status` 只剩 `docs/specs/_archived/`（注册文件逐字节还原——依赖 scaffold 首日写入的 Prettier 幂等形态）。
-4. **独立安装 skill**：按官方方式只安装 skill 子树（例如 `npx giget .../skills/project-scaffolder ~/.claude/skills/project-scaffolder`）后运行 `bun <skill>/scripts/scaffold.ts`，确认参数校验早退路径与真实初始化路径都不报 `Cannot find module`（scaffold 只 import skill 内部相对路径与 npm 包）。
+4. **独立安装 skill**：按官方方式只安装 skill 子树（例如 `npx giget .../tools/scaffolder ~/.claude/tools/scaffolder`）后运行 `bun <skill>/scripts/scaffold.ts`，确认参数校验早退路径与真实初始化路径都不报 `Cannot find module`（scaffold 只 import skill 内部相对路径与 npm 包）。
 5. **flat 模板**：`scaffold --type flat-go` 产物 `frontend` 可 `bun install` 且 `tsc --noEmit` 通过；`frontend/.prettierrc` 存在、根 `.prettierrc` 不存在。
 6. **多端**：分别生成单端项目与三端项目（`--web-apps` 传两个端，其中一端 `accessPermission: true`），产物各自 `bun run check` 全绿；**同源**形态下（`bun run build:web` + `scripts/collect-web-dist.ts`，API 带 `SERVE_STATIC=true`）同一浏览器里 `/` 与 `/portal/` 各自登录互不影响——开发态各端占不同端口本就不同源，验不出存储键隔离；带准入的端用无该权限的角色登录会被拦在「无权访问本系统」；窄屏真机检查侧边栏收起为 Sheet、刘海 / 底部安全区不遮挡内容。
 7. **多端往返与按端模块**：三端项目里 `gen:module --name contract --label "合同"` → `gen:module --name contract --app portal`（后端 5 个注册文件 sha256 不变）→ `remove:module --name contract --app portal`（web / 后端不动）→ `remove:module --name contract --all-apps`；再 `add:web --id admin2 --title "管理端"` → install → `remove:module --app admin2 --all-modules` → `remove:web --id admin2`，`git diff` 零行零脏（含 bun.lock）。
@@ -171,7 +171,7 @@ This clones (if absent) or pulls (if cached) the template repo into `~/liquid-gl
 
 ## 技能自更新与重启协议
 
-脚本每次 clone/pull 模板缓存后，会把**正在运行的这份技能**（`<SKILL_DIR>`，运行时由 `import.meta.dir` 上溯一级得到）同步到缓存里的 `skills/project-scaffolder/`。源就是刚 pull 的缓存，因此技能与它即将使用的模板**严格同源同提交**；不再另跑 giget，也不发额外网络请求。
+脚本每次 clone/pull 模板缓存后，会把**正在运行的这份技能**（`<SKILL_DIR>`，运行时由 `import.meta.dir` 上溯一级得到）同步到缓存里的 `tools/scaffolder/`。源就是刚 pull 的缓存，因此技能与它即将使用的模板**严格同源同提交**；不再另跑 giget，也不发额外网络请求。
 
 同步是逐文件内容比对：覆盖改动与新增，**物理删除上游已删的孤儿文件**（例如旧版残留的 `scripts/lib/long-file-ratchet.ts`）并清理空目录。
 

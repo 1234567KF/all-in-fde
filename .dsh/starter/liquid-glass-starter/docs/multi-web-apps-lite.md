@@ -176,7 +176,7 @@ for (const app of ordered) {
 
 新增端时**克隆目标项目自己的 `apps/web`**（递归复制，排除 `node_modules` / `dist` / `coverage` / `.vite` / `.cache` / `*.tsbuildinfo` / `.eslintcache` 等产物），再改 6 个身份文件。机械部分全在项目侧 `scripts/add-web.ts`，技能只做参数形状校验与编排。
 
-**为什么不再单独维护一份空壳**：原方案在 `skills/project-scaffolder/templates/web/` 手工维护了 17 个文件的无业务空壳，实施后整目录删除。三条理由，前两条是设计判断，第三条是实测：
+**为什么不再单独维护一份空壳**：原方案在 `tools/scaffolder/templates/web/` 手工维护了 17 个文件的无业务空壳，实施后整目录删除。三条理由，前两条是设计判断，第三条是实测：
 
 - **分类错误（preset 的教训）**：原方案设了 pc / h5 两套预设，实施后砍掉 h5 并移除整个 `preset` 概念。uniapp / Taro / 小程序不是这个 React 模板的「变体」，是另一套技术栈；而注册表驱动的整条工具链全都假设 Vite + React workspace。一个 `preset: "h5"` 条目对外承诺「移动端」，实际交付「React 加了安全区 CSS」，比没有更误导。
 - **双份拷贝的维护税**：两套预设 16 个文件里有 9 个逐字节相同、另 5 个只差 44 行，真正不同的只有布局。实施期就出现过 pc 壳缺 `TooltipProvider`、有权限用户登录后整页崩溃，而 h5 壳没这个问题的情况。

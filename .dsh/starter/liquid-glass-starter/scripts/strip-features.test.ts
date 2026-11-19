@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "bun:test"
 import {
   isExcludedFromTemplate,
   stripTemplateOnlyMarkdownRegions,
-} from "../skills/project-scaffolder/scripts/lib/template-copy"
+} from "../tools/scaffolder/scripts/lib/template-copy"
 import {
   FEATURE_IDS,
   type FeatureId,

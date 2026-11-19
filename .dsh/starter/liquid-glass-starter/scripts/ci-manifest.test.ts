@@ -28,7 +28,7 @@ import { describe, expect, it } from "bun:test"
 const REPO_ROOT = fileURLToPath(new URL("..", import.meta.url))
 const SCAFFOLD_PATH = path.join(
   REPO_ROOT,
-  "skills/project-scaffolder/scripts/scaffold.ts"
+  "tools/scaffolder/scripts/scaffold.ts"
 )
 const CI_PATH = path.join(REPO_ROOT, ".gitlab-ci.yml")
 const PREPROD_COMPOSE_PATH = path.join(REPO_ROOT, "compose.preprod.yml")
@@ -109,7 +109,7 @@ const portStampFiles = scaffoldExists
 // 路径用 string 变量承载：tsc 会解析字面量 import，生成项目缺 skills/ 时即 TS2307；
 // 非字面量路径不触发解析，运行时仍由 scaffoldExists 守卫。
 const templateCopyPath: string =
-  "../skills/project-scaffolder/scripts/lib/template-copy"
+  "../tools/scaffolder/scripts/lib/template-copy"
 const templateCopy = scaffoldExists ? await import(templateCopyPath) : null
 
 /** init 复制时该路径是否被排除（漏排除 = 模板原件泄漏进生成项目）。 */

@@ -350,7 +350,7 @@ bun run test:ci                 # 前后端覆盖率阈值
 
 首次触发方式：`git push origin main` 或 GitLab UI → Pipelines → Run pipeline。
 
-详见：`skills/project-scaffolder/references/ci-guide.md`
+详见：`tools/scaffolder/references/ci-guide.md`
 ```
 
 ---
