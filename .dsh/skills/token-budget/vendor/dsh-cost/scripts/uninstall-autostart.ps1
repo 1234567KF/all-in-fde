@@ -1,5 +1,5 @@
 # Remove the logon task. Ledger data is kept.
-# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File "D:\all-in-fde\tools\dsh-cost\scripts\uninstall-autostart.ps1"
+# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File "<dsh-cost目录>\scripts\uninstall-autostart.ps1"
 $ErrorActionPreference = 'Stop'
 $taskName = 'DSH-Cost-Watch'
 $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue

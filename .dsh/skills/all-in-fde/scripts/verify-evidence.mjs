@@ -2,19 +2,29 @@
 /**
  * 校验证据文件：shape、by.kind 约束、ID 全集、mode 一致性。
  *
- * 用法：node scripts/verify-evidence.mjs [证据目录]
+ * 用法：node scripts/verify-evidence.mjs [证据目录] [--strict]
  * 默认：.fde/evidence
  * 退出码：0 通过；1 有错误。
  *
  * 与 docs/证据schema与门禁ID对照.md 保持一致。schema 管形状，本脚本管「ID 全集」与「门级一致性」。
+ *
+ * v0.4.0 起额外守两条（来自一次真实事故）：
+ *  - E6-9（验收卡）只能是 card/human 产出，且必须带 signature；
+ *    脚本产出的 E6 里 E6-9 只能是 SKIP 或 FAIL，不许 PASS。
+ *  - 一条门一个文件：同 gate+target 多份且 revision 相同 → 重复证据。
+ *    默认只是 WARN（兼容历史），加 --strict 变 ERROR（交付/CI 用）。
  */
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
-import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
+import { join, resolve, isAbsolute } from 'node:path';
 
-const skillRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const target = process.argv[2] ? resolve(process.argv[2]) : join(process.cwd(), '.fde', 'evidence');
+const argv = process.argv.slice(2);
+const strict = argv.includes('--strict');
+const argDir = argv.find((a) => !a.startsWith('--'));
+const target = argDir ? resolve(argDir) : join(process.cwd(), '.fde', 'evidence');
+
+// 一条 check 日志的有效期：引用更早的日志给今天的票背书不算证据
+const FRESH_MS = 20 * 60 * 1000;
+const evPath = (p) => (isAbsolute(p) ? p : resolve(process.cwd(), p));
 
 const GATE_IDS = {
   E0: ['E0-1', 'E0-2', 'E0-3', 'E0-4', 'E0-5', 'E0-6'],
@@ -25,7 +35,9 @@ const GATE_IDS = {
 const REQUIRED_ENVELOPE = ['schema', 'gate', 'revision', 'mode', 'by', 'started_at', 'finished_at', 'summary', 'items'];
 
 const errors = [];
+const warnings = [];
 const err = (m) => errors.push(m);
+const warn = (m) => warnings.push(m);
 
 if (!existsSync(target)) {
   console.log(`无证据目录：${target}（没有证据不判错误，由调用方决定是否缺证据）`);
@@ -38,7 +50,10 @@ if (files.length === 0) {
   process.exit(0);
 }
 
-let latest = new Map(); // gate -> 最大 revision 的文件
+/** gate+target -> 已见 revision 集合 */
+const seen = new Map();
+let latest = new Map(); // gate+target -> 最大 revision 的文件
+
 for (const f of files) {
   const raw = readFileSync(join(target, f), 'utf8');
   let e;
@@ -53,12 +68,11 @@ for (const f of files) {
     err(`${f}: gate 不是 E0/E5/E6/E7`);
     continue;
   }
-  // 信封必填
   for (const k of REQUIRED_ENVELOPE) {
     if (e[k] === undefined || e[k] === null || e[k] === '') err(`${f}: 缺字段 ${k}`);
   }
   if (e.schema !== 'fde.evidence/v1') err(`${f}: schema 应为 fde.evidence/v1`);
-  // by.kind 约束
+
   const kind = e.by && e.by.kind;
   if (kind === 'script') {
     if (e.cmd === undefined || e.exit === undefined) err(`${f}: script 证据缺 cmd/exit`);
@@ -67,26 +81,99 @@ for (const f of files) {
   } else {
     err(`${f}: by.kind 非法`);
   }
-  // items
+
   const ids = (e.items || []).map((i) => i.id);
   const want = GATE_IDS[gate];
   for (const id of want) if (!ids.includes(id)) err(`${f}: 缺 item ${id}`);
   for (const id of ids) if (!want.includes(id)) err(`${f}: 非法 item ${id}`);
   if (new Set(ids).size !== ids.length) err(`${f}: item id 重复`);
-  // 门级 mode 与条目一致
+
+  // E6-9 只能由验收卡产出
+  if (gate === 'E6') {
+    const card = (e.items || []).find((i) => i.id === 'E6-9');
+    if (card && card.mode === 'PASS' && kind !== 'card' && kind !== 'human') {
+      err(`${f}: E6-9 判 PASS 但 by.kind=${kind}；验收卡必须由 card-evidence.mjs 产出（带 signature）`);
+    }
+    if (card && card.mode === 'PASS' && (kind === 'card' || kind === 'human') && !e.signature?.by) {
+      err(`${f}: E6-9 判 PASS 但没有点选人签名`);
+    }
+  }
+
+  // E5-2 时效与 E5-9 时序：v0.4.1 起由脚本兜底（此前只写在手册里）
+  if (gate === 'E5') {
+    const msg = (m) => (strict ? err(m) : warn(m));
+    const byId = (id) => (e.items || []).find((i) => i.id === id);
+
+    const e52 = byId('E5-2');
+    if (e52) {
+      const logs = (e52.evidence || [])
+        .map(evPath)
+        .filter((p) => existsSync(p) && /\.(log|txt|md)$/i.test(p));
+      if (logs.length === 0) {
+        msg(`${f}: E5-2 没有可核对的 check 日志（引用 ${JSON.stringify(e52.evidence || [])}）；记本次运行的日志路径`);
+      } else {
+        const started = Date.parse(e.started_at);
+        const newest = Math.max(...logs.map((p) => statSync(p).mtimeMs));
+        const lag = Number.isFinite(started) ? Math.abs(newest - started) : NaN;
+        if (Number.isFinite(lag) && lag > FRESH_MS) {
+          msg(
+            `${f}: E5-2 的日志与 started_at 相差 ${Math.round(lag / 60000)} 分钟，超出 20 分钟窗口；旧日志不能给本票背书`
+          );
+        }
+      }
+    }
+
+    const e59 = byId('E5-9');
+    if (e59) {
+      const refs = (e59.evidence || []).map(evPath);
+      if (refs.length === 0 || !refs.some((p) => existsSync(p))) {
+        msg(`${f}: E5-9 指向的复核记录不存在（${JSON.stringify(e59.evidence || [])}）；先复核、后出证据`);
+      } else {
+        const finished = Date.parse(e.finished_at);
+        const newest = Math.max(
+          ...refs.filter((p) => existsSync(p)).map((p) => statSync(p).mtimeMs)
+        );
+        if (Number.isFinite(finished) && newest > finished + 60_000) {
+          msg(
+            `${f}: E5-9 的复核记录晚于证据落盘 ${Math.round((newest - finished) / 60000)} 分钟；顺序应是先复核、后出证据`
+          );
+        }
+      }
+    }
+  }
+
   const itemModes = new Set((e.items || []).map((i) => i.mode));
   if (e.mode === 'PASS' && itemModes.has('FAIL')) err(`${f}: 门 mode=PASS 但有条目 FAIL`);
   if (e.mode === 'PASS' && itemModes.has('SKIP') && gate !== 'E0') err(`${f}: ${gate} 不允许 SKIP 冒充 PASS`);
   if (!['PASS', 'FAIL', 'SKIP'].includes(e.mode)) err(`${f}: 非法 mode`);
-  // 取最大 revision
-  const prev = latest.get(gate);
-  if (!prev || (e.revision || 0) > (prev.e.revision || 0)) latest.set(gate, { f, e });
+
+  // 一条门一个文件：同 gate+target+revision 重复
+  const key = `${gate}::${e.target || ''}`;
+  if (!seen.has(key)) seen.set(key, []);
+  const keySeen = seen.get(key);
+  const dup = keySeen.find((x) => (x.revision || 0) === (e.revision || 0));
+  if (dup) {
+    const msg = `${f}: 与 ${dup.file} 同为 ${gate}/${e.target || '(空)'} revision=${e.revision}，属重复证据；覆盖同名文件，或升 revision 并写 supersedes`;
+    if (strict) err(msg);
+    else warn(msg);
+  }
+  keySeen.push({ file: f, revision: e.revision || 0 });
+
+  const prev = latest.get(key);
+  if (!prev || (e.revision || 0) > (prev.e.revision || 0)) latest.set(key, { f, e });
 }
+
+for (const w of warnings) console.warn(`WARN  ${w}`);
 
 if (errors.length) {
   for (const m of errors) console.error(`ERROR ${m}`);
   console.error(`\n失败：${errors.length} 处`);
   process.exit(1);
 }
-const summary = [...latest.entries()].map(([g, { f }]) => `${g}(${f})`).join(' ');
+const summary = [...latest.entries()]
+  .map(([k, { f, e }]) => `${k.replace('::', '/')}(${f}, ${e.mode})`)
+  .join(' ');
 console.log(`通过：${files.length} 份证据，门级状态：${summary || '无'}`);
+if (!strict && warnings.length) {
+  console.log(`提示：${warnings.length} 条 WARN 未阻断；交付前用 --strict 复跑。`);
+}

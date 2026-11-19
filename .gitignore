@@ -15,6 +15,7 @@
 /.dsh/*
 !/.dsh/skills/
 !/.dsh/bundles/
+!/.dsh/starter/
 # 运行时另行安装、不属于本仓库的技能，按名字排除
 /.dsh/skills/graphify/
 

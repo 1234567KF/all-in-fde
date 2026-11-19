@@ -151,7 +151,7 @@ FOUR_CHAR_RUN = re.compile(
 FENCE = re.compile(r"^\s*(```|~~~)")
 URL = re.compile(r"https?://\S+")
 MD_SYNTAX = re.compile(r"[#>*`_|\-\[\]()!~]")
-TABLE_SEP = re.compile(r"^\s*\|?[\s:\-|]+\|[\s:\-|]*$")
+TABLE_SEP = re.compile(r"^\s*\|[\s:\-|]+\|$")
 
 # 专业档：A2 有定义即保留，恒 WARN
 PROFESSIONAL = {"tech", "compliance", "standard", "patent", "kb", "bid"}

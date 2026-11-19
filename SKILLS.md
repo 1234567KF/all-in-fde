@@ -6,9 +6,9 @@
 
 | 技能 | 版本 | 许可证 | 上游 | 说明 |
 | --- | --- | --- | --- | --- |
-| [all-in-fde](.dsh/skills/all-in-fde/) | 0.1.0 | MIT | 自研 | 把一段需求推进到可验收的小型 IT 系统 |
+| [all-in-fde](.dsh/skills/all-in-fde/) | 0.2.2 | MIT | 自研 | 把一段需求推进到可验收的小型 IT 系统 |
 | [ai-flavor-guard](.dsh/skills/ai-flavor-guard/) | 0.1.1 | MIT | 本地自研 | 控制中文文本的 AI 味词汇 |
-| [token-budget](.dsh/skills/token-budget/) | 0.2.0 | MIT | 自研 | Token 预算：plan / brief / squeeze / verify |
+| [token-budget](.dsh/skills/token-budget/) | 0.3.0 | MIT | 自研 | Token 预算：plan / brief / squeeze / verify / stat |
 | [ponytail](.dsh/skills/ponytail/) | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 写代码时的最小完整改动，先复用再新写 |
 | [rea-video](.dsh/skills/rea-video/) | 0.1.0 | Apache-2.0 | [JuneYaooo/rea-video](https://github.com/JuneYaooo/rea-video) | 逆向拆解视频：逐镜判断实拍 / AI / 代码渲染，拆声音与包装，给复刻方案 |
 

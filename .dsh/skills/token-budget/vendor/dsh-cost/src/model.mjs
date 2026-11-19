@@ -225,12 +225,16 @@ function descendantIds(rawSessions, rootId) {
   return ids;
 }
 
-export function buildLedger(rawSessions, pricing, mediaRecords = []) {
-  const epoch = loadEpoch();
+export function buildLedger(rawSessions, pricing, mediaRecords = [], options = {}) {
+  const epoch = options.ignoreEpoch ? null : loadEpoch();
   const resetAt = epoch?.resetAt ?? 0;
-  const scopeIds =
-    epoch?.mode === 'from-session' && epoch.sessionId ? descendantIds(rawSessions, epoch.sessionId) : null;
-  const scopedSessions = scopeIds ? rawSessions.filter((session) => scopeIds.has(session.header?.id)) : rawSessions;
+  let scopedSessions = rawSessions;
+  if (epoch?.mode === 'from-session' && epoch.sessionId) {
+    const ids = descendantIds(rawSessions, epoch.sessionId);
+    scopedSessions = rawSessions.filter((session) => ids.has(session.header?.id));
+  } else if (epoch?.mode === 'workspace-from-time' && epoch.workspace) {
+    scopedSessions = rawSessions.filter((session) => session.header?.workspace === epoch.workspace);
+  }
   const sessionsInScope = resetAt
     ? scopedSessions.map((session) => filterSession(session, resetAt)).filter(Boolean)
     : scopedSessions;

@@ -20,7 +20,8 @@ import { parseArgs } from 'node:util';
 import { listSessionFiles, readSessionFile, safeName } from '../src/read.mjs';
 import { convert, fmtInt, fmtMoney, fmtTime, loadPricing, mediaPrice } from '../src/price.mjs';
 import { buildLedger } from '../src/model.mjs';
-import { renderOverview, renderPrice, renderSession, renderSessions, renderSkills, renderTasks, renderTree, viewOf } from '../src/report.mjs';
+import { renderOverview, renderPrice, renderSession, renderSessions, renderSkills, renderTasks, renderTree, renderTurns, viewOf } from '../src/report.mjs';
+import { renderDashboard } from '../src/dashboard.mjs';
 import { compareTask, renderCompare } from '../src/ab.mjs';
 
 const HERE = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -42,6 +43,7 @@ function parse() {
       days: { type: 'string' },
       workspace: { type: 'string' },
       out: { type: 'string' },
+      limit: { type: 'string' },
       calls: { type: 'boolean', default: false },
       sessions: { type: 'boolean', default: false },
       json: { type: 'boolean', default: false },
@@ -61,6 +63,7 @@ function parse() {
       since: { type: 'string' },
       at: { type: 'string' },
       'dry-run': { type: 'boolean', default: false },
+      all: { type: 'boolean', default: false },
       'no-sync': { type: 'boolean', default: false },
       help: { type: 'boolean', default: false },
     },
@@ -109,7 +112,10 @@ function loadEpoch() {
 }
 
 function pruneScope(epoch) {
-  if (epoch?.mode !== 'from-session' || !epoch.sessionId) return 0;
+  const mode = epoch?.mode;
+  if (mode === 'from-session' && !epoch.sessionId) return 0;
+  if (mode !== 'from-session' && mode !== 'workspace-from-time') return 0;
+  if (mode === 'workspace-from-time' && !epoch.workspace) return 0;
   const sessionsDir = path.join(dataDir, 'sessions');
   if (!fs.existsSync(sessionsDir)) return 0;
   const indexPath = path.join(dataDir, 'index.json');
@@ -125,16 +131,29 @@ function pruneScope(epoch) {
       }
     })
     .filter(Boolean);
-  const allowed = new Set([epoch.sessionId]);
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (const entry of entries) {
-      const id = entry.session?.header?.id;
-      const parent = entry.session?.header?.parentId;
-      if (id && parent && allowed.has(parent) && !allowed.has(id)) {
-        allowed.add(id);
-        changed = true;
+  let allowed;
+  if (mode === 'workspace-from-time') {
+    allowed = new Set(
+      entries
+        .filter(
+          (entry) =>
+            entry.session?.header?.workspace === epoch.workspace &&
+            (entry.session?.calls || []).some((call) => call.time >= epoch.resetAt),
+        )
+        .map((entry) => entry.session.header.id),
+    );
+  } else {
+    allowed = new Set([epoch.sessionId]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const entry of entries) {
+        const id = entry.session?.header?.id;
+        const parent = entry.session?.header?.parentId;
+        if (id && parent && allowed.has(parent) && !allowed.has(id)) {
+          allowed.add(id);
+          changed = true;
+        }
       }
     }
   }
@@ -150,10 +169,10 @@ function pruneScope(epoch) {
   return removed;
 }
 
-function syncSessions({ force = false, quiet = false, sinceMs, onlyId } = {}) {
+function syncSessions({ force = false, quiet = false, sinceMs, onlyId, ignoreEpoch = false } = {}) {
   const sessionsDir = path.join(dataDir, 'sessions');
   fs.mkdirSync(sessionsDir, { recursive: true });
-  const epoch = loadEpoch();
+  const epoch = ignoreEpoch ? null : loadEpoch();
   const cutoff = sinceMs ?? (epoch?.resetAt ? epoch.resetAt - 10 * 60 * 1000 : 0);
   const only = onlyId;
   const indexPath = path.join(dataDir, 'index.json');
@@ -219,14 +238,14 @@ function loadMedia() {
     .filter(Boolean);
 }
 
-function loadLedger({ sync = true } = {}) {
-  if (sync && !opts.values['no-sync']) syncSessions({ quiet: true });
+function loadLedger({ sync = true, all = false } = {}) {
+  if (sync && !opts.values['no-sync']) syncSessions({ quiet: true, ignoreEpoch: all });
   const sessions = loadSessions();
   if (!sessions.length) {
     console.error(`没有会话数据。先运行：node ${path.relative(process.cwd(), path.join(HERE, 'bin', 'dsh-cost.mjs'))} sync`);
     process.exit(2);
   }
-  return buildLedger(sessions, loadPricing(pricingFile), loadMedia());
+  return buildLedger(sessions, loadPricing(pricingFile), loadMedia(), { ignoreEpoch: all });
 }
 
 function output(markdown, { json } = {}) {
@@ -250,7 +269,7 @@ function viewOptions() {
 switch (opts.command) {
   case 'sync': {
     const sinceMs = opts.values.since ? Date.parse(opts.values.since) : undefined;
-    syncSessions({ force: opts.values.force, quiet: opts.values.quiet, sinceMs });
+    syncSessions({ force: opts.values.force, quiet: opts.values.quiet, sinceMs, ignoreEpoch: Boolean(opts.values.all) });
     break;
   }
   case 'reset': {
@@ -361,8 +380,56 @@ switch (opts.command) {
     if (status.lastError) console.log(`最近错误：${status.lastError}`);
     break;
   }
+  case 'scope': {
+    const at = opts.values.at ? (opts.values.at === 'now' ? Date.now() : Date.parse(opts.values.at)) : Date.now();
+    if (!Number.isFinite(at)) fail('--at 不是合法时间');
+    const workspace = opts.values.workspace;
+    const sessionArg = opts.values.session;
+    if (opts.values.all) {
+      fs.rmSync(path.join(dataDir, 'epoch.json'), { force: true });
+      syncSessions({ force: true, quiet: false, ignoreEpoch: true });
+      console.log('已取消计费起点：之后 report 默认统计全部历史。');
+      break;
+    }
+    if (sessionArg) {
+      const current = findCurrentSession(sessionArg);
+      if (!current) fail(`找不到会话：${sessionArg}`);
+      const resetAt = opts.values.at ? at : current.createdAt;
+      fs.writeFileSync(
+        path.join(dataDir, 'epoch.json'),
+        JSON.stringify({ resetAt, resetAtIso: new Date(resetAt).toISOString(), sessionId: current.id, mode: 'from-session', note: opts.values.note ?? 'scope session' }, null, 2),
+      );
+      syncSessions({ force: true, quiet: false, onlyId: current.id, sinceMs: 0 });
+      console.log(`计费范围：会话 ${current.id}，起点 ${new Date(resetAt).toLocaleString('zh-CN')}`);
+      break;
+    }
+    if (!workspace) fail('用法：scope --workspace <名称> [--at ISO] | scope --session <id> | scope --all');
+    fs.writeFileSync(
+      path.join(dataDir, 'epoch.json'),
+      JSON.stringify({ resetAt: at, resetAtIso: new Date(at).toISOString(), mode: 'workspace-from-time', workspace, note: opts.values.note ?? 'scope workspace' }, null, 2),
+    );
+    syncSessions({ force: true, quiet: false, sinceMs: at - 10 * 60 * 1000 });
+    console.log(`计费范围：工作空间 ${workspace}，起点 ${new Date(at).toLocaleString('zh-CN')}`);
+    break;
+  }
+  case 'turns': {
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
+    const view = viewOf(ledger, viewOptions());
+    output(renderTurns(ledger, view, { limit: opts.values.limit ? Number(opts.values.limit) : 200 }));
+    break;
+  }
+  case 'dashboard': {
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
+    const view = viewOf(ledger, viewOptions());
+    const out = path.resolve(opts.values.out ?? path.join(path.dirname(dataDir), 'reports', 'dashboard.html'));
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, renderDashboard(ledger, view), 'utf8');
+    console.log(`已生成看板：${out}`);
+    console.log('用浏览器直接打开；数据更新后重跑本命令即可，不调用模型、不产生 token。');
+    break;
+  }
   case 'report': {
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     const view = viewOf(ledger, viewOptions());
     let markdown = renderOverview(ledger, view);
     if (opts.values.sessions) markdown += `\n\n${renderSessions(ledger, view)}`;
@@ -373,31 +440,31 @@ switch (opts.command) {
     break;
   }
   case 'sessions': {
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     output(renderSessions(ledger, viewOf(ledger, viewOptions())));
     break;
   }
   case 'session': {
     const needle = opts.args[0];
     if (!needle) fail('用法：session <会话 id 或前缀>');
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     const session = ledger.sessions.find((candidate) => candidate.id === needle) || ledger.sessions.find((candidate) => candidate.id.startsWith(needle) || candidate.id.includes(needle));
     if (!session) fail(`找不到会话：${needle}`);
     output(renderSession(ledger, session, { withCalls: opts.values.calls }));
     break;
   }
   case 'tasks': {
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     output(renderTasks(ledger, viewOf(ledger, viewOptions())));
     break;
   }
   case 'skills': {
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     output(renderSkills(ledger, viewOf(ledger, viewOptions())));
     break;
   }
   case 'tree': {
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     output(renderTree(ledger));
     break;
   }
@@ -431,7 +498,7 @@ switch (opts.command) {
       if (cost === null) console.log('提示：价格表里该模型单价为空，先用 --amount 传实际金额，或在 pricing.json 的 media 段填单价。');
       break;
     }
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     const media = ledger.media || [];
     if (opts.values.json) {
       process.stdout.write(JSON.stringify(media, null, 2));
@@ -447,7 +514,7 @@ switch (opts.command) {
   }
   case 'compare': {
     if (!opts.values.task) fail('用法：compare --task <任务标签> [--base A] [--cand B] [--judgments bench/judgments.json]');
-    const ledger = loadLedger();
+    const ledger = loadLedger({ all: Boolean(opts.values.all) });
     const defaultJudgments = path.join(HERE, 'bench', 'judgments.json');
     const judgmentsFile = opts.values.judgments ?? (fs.existsSync(defaultJudgments) ? defaultJudgments : undefined);
     const result = compareTask(ledger, { task: opts.values.task, base: opts.values.base, cand: opts.values.cand, judgmentsFile });
@@ -462,19 +529,26 @@ switch (opts.command) {
 用法：
   node dsh-cost.mjs sync [--force] [--since ISO]      增量同步会话日志
   node dsh-cost.mjs reset [--at ISO] [--session ID] [--note TEXT]  清空账本/报表，只统计此后的调用
+  node dsh-cost.mjs scope --workspace all-in-fde [--at ISO]         计费范围：本工作空间全部会话
+  node dsh-cost.mjs scope --session ID [--at ISO]                   计费范围：单个会话
+  node dsh-cost.mjs scope --all                                     取消起点，默认统计全部历史
   node dsh-cost.mjs watch [--interval 60]             后台常驻，按间隔/文件变化增量同步
   node dsh-cost.mjs status                        查看 watch 最近一次同步状态
-  node dsh-cost.mjs report [--days 30] [--workspace all-in-fde] [--sessions] [--out FILE]
-  node dsh-cost.mjs session <id前缀> [--calls]    单会话逐轮账单
-  node dsh-cost.mjs tasks                          任务账本（按 #task 标签）
-  node dsh-cost.mjs skills                         技能成本
-  node dsh-cost.mjs tree                           子代理成本树
+  node dsh-cost.mjs report [--all] [--days 30] [--workspace all-in-fde] [--sessions] [--out FILE]
+  node dsh-cost.mjs turns [--all] [--limit 200] [--workspace all-in-fde]  每条人类指令的明细
+  node dsh-cost.mjs dashboard [--all] [--workspace all-in-fde] [--out FILE]  生成本地 HTML 看板
+  node dsh-cost.mjs sessions [--all] [--workspace all-in-fde]
+  node dsh-cost.mjs session <id前缀> [--all] [--calls]    单会话逐轮账单
+  node dsh-cost.mjs tasks [--all]                  任务账本（按 #task 标签）
+  node dsh-cost.mjs skills [--all]                 技能成本
+  node dsh-cost.mjs tree [--all]                   子代理成本树
   node dsh-cost.mjs price                          当前价格表（多 provider / 多币种 / 按张）
   node dsh-cost.mjs media                          媒体生成记录
   node dsh-cost.mjs media add --provider minimax-cn --model image-01 --qty 1 [--variant 1k] [--amount 0.2] [--session id] [--task doc-01]
   node dsh-cost.mjs compare --task doc-01 [--base A] [--cand B] [--judgments FILE]
 
 全局参数：
+  --all                 忽略 epoch 重置起点，读取全部历史会话
   --data DIR            数据目录（默认 ./data）
   --pricing FILE        价格表（默认 ./pricing.json）
   --sessions-root DIR   会话根目录（默认 ~/.dsh/sessions）

@@ -20,12 +20,11 @@
 
 ```bash
 node scripts/check-skills.mjs      # 校验技能目录结构
-node scripts/sync-index.mjs        # 重建 skills.json
-node scripts/sync-runtime.mjs      # 同步到 .dsh/skills
+node scripts/sync-index.mjs        # 重建根目录 skills.json（技能索引）
 ```
 
 ## 约束
 
 - 技能产物不得出现内网地址、本机路径、内部项目名；用 `node scripts/check-public-artifacts.mjs` 把关。
 - 入口只路由，步骤细节进 `references/`，用到才加载。
-- 三个执行者预设（`fde-lead` / `fde-worker` / `fde-qa`）是可选增强，装在仓库的 `bundles/fde-presets/`；技能不依赖它们，缺了按 `SKILL.md` 的退回规则同屏执行。
+- 三个执行者预设（`fde-lead` / `fde-worker` / `fde-qa`）是可选增强，装在仓库的 `.dsh/bundles/fde-presets/`；技能不依赖它们，缺了按 `SKILL.md` 的退回规则同屏执行。

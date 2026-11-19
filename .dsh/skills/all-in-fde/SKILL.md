@@ -2,7 +2,7 @@
 name: all-in-fde
 description: 把一段需求推进到可验收的小型 IT 系统时使用。触发：用户说「我要做个 XX 系统 / 功能 / 页面」「帮我把这个需求变成能用的东西」「我不会写代码但想要个能管 XX 的工具」「继续上次那个项目」。流程：填需求采集表让人审定 → 拆成票 → 生成 PRD 与原型 → 逐票实现并自测 → 冷启动验收 → 交付。不用于：纯咨询与写文档/PPT、给已有项目加单个字段（走脚手架领域技能）、多模块要流水线并行的大项目。
 metadata:
-  version: "0.2.1"
+  version: "0.4.1"
 ---
 
 # all-in-fde
@@ -21,6 +21,11 @@ metadata:
 派发写法：用 `subagent` 工具，`agent_preset` 填 `fde-worker`（实现票）或 `fde-qa`（验收票），一次只派一张票，同一批文件不派两个 Worker；同时按票的类型定推理档（`off`/`low`/`high`/`max`，见 `references/slice.md` 的「派发时定档」），别一律拉满。
 
 **预设没装时不能卡住**：三个预设是可选增强。检测不到 `fde-worker`，就退回同会话执行——单票项目本来就该同屏做完；检测不到 `fde-qa`，就由人按 `references/verify.md` 逐项走查。退回时在自测报告写一句「预设未装，同屏执行」。
+
+**同屏实现的代价要补回来**：实现与复核同源时，「独立复核」会退化成自我确认。此时必须做两件事，否则 E5-9 判无效：
+
+1. 复核换成**不同模型或不同会话**的只读子代理，只拿票 + Spec + 证据，重跑验收谓词；
+2. 复核记录里写明「实现与复核未隔离」，并在 E5-9 的 `evidence` 指向该记录。
 
 ## 先读现场
 
@@ -45,8 +50,8 @@ metadata:
 | 收活 | 一段话 → brief + 采集表 S0 | brief 五节齐、S0 至少一条 | intake.md |
 | 校准 | 采集表 → PRD → 原型 | 表无空表、S15 无缺口、编号可回溯 | spec.md |
 | 切片 | 规格 → 一组票 | 每票一上下文可完成、可演示、依赖无环 | slice.md |
-| 起架 | 脚手架生成项目 | 空项目 `check` 绿 | scaffold.md |
-| 逐单 | 实现 + 自测 + 证据 | 验收谓词逐条有证据、数据断言不为零 | implement.md |
+| 起架 | 读坐标并用脚手架生成项目（无坐标先问人，不许自建） | 空项目 `check` 绿 + E3 记 `starter` 或 `skipped` | scaffold.md |
+| 逐单 | 实现 + 自测 + 证据（起架后先看对照表） | 验收谓词逐条有证据、数据断言不为零 | implement.md、starter-map.md |
 | 验收 | 复核 + 冷启动 + E2E | 四步全过、卡无「有问题」 | verify.md |
 | 交付 | 三件套 + 回流 | 干净目录可起、可回滚 | delivery.md |
 
@@ -57,8 +62,11 @@ metadata:
 证据规则：
 
 - 证据文件按 `fde.evidence/v1` 的 schema 写，只能由脚本或卡片工具产出，**agent 只读不写**。
-- 一条门一个文件：`evidence/E0-*.json`、`E5-<票号>.json`、`E6-<卡号>.json`、`E7-*.json`。
+- 一条门一个文件（同一 `gate + target` 只留一份；重跑覆盖同名文件，或升 `revision` 并写 `supersedes`）：`evidence/E0-*.json`、`E5-<票号>.json`、`E6-<卡号>.json`、`E7-*.json`。
 - 三态 PASS / FAIL / SKIP；SKIP 必须写原因，不算通过。
+- **E6-9（验收卡）只能由 `scripts/card-evidence.mjs` 从人填好的卡片产出**，带 `signature`。脚本产出的 E6 里 E6-9 只能是 SKIP 或 FAIL——「AI 跑通了同一条链路」不等于「人确认了」。
+- 交付前跑 `node scripts/verify-evidence.mjs .fde/evidence --strict`，退出 0 才算过。
+- **对外汇报逐门报状态**（`E0 PASS / E5 PASS / E6 FAIL（待人点选）/ E7 PASS`），不写「四门全绿」这种总括词——总括词会把「待人确认」吞掉。
 
 ## 票
 
@@ -83,7 +91,7 @@ metadata:
 开跑第一步，在工作区根执行：
 
 ```bash
-node scripts/ensure-tmp.mjs
+node <技能目录>/scripts/ensure-tmp.mjs
 ```
 
 它做两件事，都幂等：建 `.fde-tmp/` 与 README；把 `.fde-tmp/` 写进该仓库的 `.git/info/exclude`。**这是本机排除，不会进提交**——所以既不改对方的 `.gitignore`，也不会让 `git status` 出现未跟踪文件。脚本会自己向上找最近的 `.git`，子目录工作区写的是相对路径，worktree 也能识别。非 git 目录只建目录，跳过排除。
@@ -96,8 +104,16 @@ node scripts/ensure-tmp.mjs
 
 1. 没跑 `ensure-tmp.mjs` 就开始写中间文件，算流程错误。
 2. 不往工作区根目录扔文件；`.fde/` 只放 brief、票、证据、handoff、retro。
-3. 任务收尾说一句「`.fde-tmp/` 可删」；按时间清用 `scripts/clean-tmp.mjs --older-than 7`。
+3. 任务收尾说一句「`.fde-tmp/` 可删」；按时间清用 `<技能目录>/scripts/clean-tmp.mjs --older-than 7`。
 4. **绝不修改对方的 `.gitignore` 或任何被跟踪文件**——排除只走 `.git/info/exclude`。
+
+收尾前核一条：`git ls-files .fde-tmp` 必须为空（临时产物一旦入库，交付物就混着调试残留；要清用 `git rm -r --cached .fde-tmp`）。
+
+**唯一例外**：E7 干净目录副本（`e7-fresh-copy.mjs`）放在项目**同级**而不是 `.fde-tmp/`——`fs.cpSync` 不允许把目录复制进自身子树。副本路径写进 E7 证据，归档前可删。
+
+还原被跟踪文件一律用 `git checkout <commit> -- <path>`；**不要用文本管道**（`git show … | Out-File` 会把换行压成一行、让忽略规则整体失效，一次 `git add -A` 就能把几十万个依赖文件塞进索引）。
+
+**删目录前先体检**：`node <技能目录>/scripts/safe-remove.mjs <目录>`，它会拦两件事——目标里有未入库文件（删了就真没了）、目标是当前工作目录或其祖先。体检过后加 `--yes` 才真删；`--force` 只用于明确已知代价的情况，先备份。
 
 ## 边界（不做什么）
 
@@ -106,22 +122,34 @@ node scripts/ensure-tmp.mjs
 - 不碰多模块要大并发并行流水线的项目
 - 不承诺零人工：人花在设计决策 + 抽查，单模块 ≤30 分钟
 
+## 预算与统计
+
+本入口默认配合 `token-budget`，这是唯一允许主动加载的外部技能：
+
+- **开工**：加载 `token-budget`，执行 `plan --task "<用户原话>"`，按返回的 playbook 走。
+- **收尾 / 用户说“统计”**：执行 `token-budget/scripts/stat.mjs`，生成当前工作空间 `.dsh/dsh-cost/dashboard.html`，用 `present` 交给用户。
+- **新会话只说“统计”**：不需要重新走 all-in-fde，`token-budget` 会按当前工作空间直接出看板。
+- `token-budget` 未装时不阻塞流程，继续用现有技能；统计改用可用的 `dsh-cost`。
+
 ## 加载规则
 
-本技能自包含，**不依赖仓库里的其他文件**，也不主动加载别的技能。
+本技能自包含，**不依赖仓库里的其他文件**；除 `token-budget` 外不主动加载别的技能。
 
 | 什么时候 | 加载什么 | 加载哪个 |
 | --- | --- | --- |
 | 按「先读现场」判断出动作 | 只加载那一个动作的 reference | `references/{intake,spec,slice,scaffold,implement,verify,delivery}.md` |
 | 写证据、跑门禁、判通过 | 加载门禁手册 | `references/checklist.md` |
+| 开工 / 收尾 / 用户说统计 | 加载预算与统计 | `token-budget`（`plan` / `stat`） |
 | 进逐单、要写代码 | 额外加载 `ponytail`（full 档） | 外部技能，没装就跳过并在自测报告写「未装」 |
 
 三条约束：
 
 1. **一次只加载一份 reference**，不预加载下一个动作；动作切换时才换。
-2. 除 `ponytail` 外不主动加载其他技能（文档、PPT、表格类技能与本流程无关）。
+2. 除 `token-budget`、`ponytail` 外不主动加载其他技能（文档、PPT、表格类技能与本流程无关）。
 3. 编号与字段名以 `references/checklist.md` 为准，不另起名字。
 
 ## 交付后
 
 跑 `retro`：复盘这次哪里卡住、哪条证据事后被证明是假的，把它变成一条判据或一道门，写进 `retro.md`。没有可执行改动就写「无」。
+
+**节奏不是只在交付时跑一次**：起架后、每批迁移后、验收后、交付后各补一条。写不出判据的，说明还没想清楚，不写。

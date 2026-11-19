@@ -43,7 +43,7 @@ python <skill-dir>/scripts/scan_flavor.py <文本.md> --profile <档ID> \
 退出码 0 = 无 ERROR，1 = 有 ERROR，2 = 参数/文件错误。代码围栏内不检查；行内 `<!-- nocheck -->` 跳过全部规则。
 
 解释器：扫描器只用标准库，任何可用的 Python 3 都行。Windows 上 PATH 里的 `python` 可能是应用商店占位程序（静默退出 49），
-改用 `python3.12`，或共用环境 `%USERPROFILE%\.qoder\skills\kf-markdown-to-docx\.venv\Scripts\python.exe`
+改用 `python3.12`，或共用环境 `%USERPROFILE%\.dsh\skills\kf-markdown-to-docx\.venv\Scripts\python.exe`
 （设了 `ALL_IN_MD_OFFICE_VENV` 就用它指向的目录）。
 
 脚本判不了的（形容词背后有没有事实、抽象词有没有具体指代、术语是否被误伤、是否过度口语化）

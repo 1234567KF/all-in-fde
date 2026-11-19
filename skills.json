@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "totalSkills": 5,
-  "totalFiles": 93,
-  "totalBytes": 452661,
+  "totalFiles": 101,
+  "totalBytes": 542378,
   "skills": [
     {
       "name": "ai-flavor-guard",
@@ -13,20 +13,20 @@
       "entry": "SKILL.md",
       "upstream": null,
       "files": 10,
-      "bytes": 81446,
-      "sha256": "fa4b99001f241dbd23b3b1b27dd4100a9daae49fd90ee4f929c0a9e4c9acb616"
+      "bytes": 81341,
+      "sha256": "4bb099d8200ecb343195c8eec113dd295b756e36e6cf4b96899035f91dba7c77"
     },
     {
       "name": "all-in-fde",
-      "version": "0.2.1",
+      "version": "0.4.1",
       "license": "MIT",
       "redistributable": true,
       "description": "把一段需求推进到可验收的小型 IT 系统：填需求采集表 → 拆票 → PRD/原型 → 逐票实现自测 → 冷启动验收 → 交付。",
       "entry": "SKILL.md",
       "upstream": null,
-      "files": 21,
-      "bytes": 79493,
-      "sha256": "209b49da8066870d9e6033740001ce6eb7bbfa821f59e6a877f60dd3a02be603"
+      "files": 26,
+      "bytes": 130962,
+      "sha256": "5613a035cfe13b8ea8e988570e634d84d98761d456fabea661b5cc2c6d61f63e"
     },
     {
       "name": "ponytail",
@@ -62,15 +62,15 @@
     },
     {
       "name": "token-budget",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "license": "MIT",
       "redistributable": true,
-      "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify；依赖 dsh-cost，可免克隆安装。",
+      "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify/stat；统计时生成当前工作空间 dashboard；依赖 dsh-cost，可免克隆安装。",
       "entry": "SKILL.md",
       "upstream": null,
-      "files": 37,
-      "bytes": 180525,
-      "sha256": "60ae7f0dd0ac78fff3f5cc8d7784ee81e7b7d9da5087397f39e7d2abf8f0c20f"
+      "files": 40,
+      "bytes": 218878,
+      "sha256": "a41c9c6650f3dd1ca5224320cb94df7d8280358f3fe1174b21d7e07c3c597ba2"
     }
   ]
 }

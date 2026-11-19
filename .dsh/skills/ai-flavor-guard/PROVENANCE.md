@@ -6,10 +6,10 @@
 | --- | --- |
 | 技能名 | `ai-flavor-guard` |
 | 版本 | 0.1.1 |
-| 上游 | 自研，源出 `D:\all-in-md\.qoder\skills\ai-flavor-guard` |
+| 上游 | 本地自研（原工作区技能目录） |
 | 上游版本 | 未声明 |
 | 导入日期 | 2026-11-18 |
-| 导入来源 | `D:\all-in-fde\.dsh\skills\ai-flavor-guard`（目录联接，指向上述源目录） |
+| 导入来源 | 本机 `.dsh/skills/ai-flavor-guard`（目录联接，指向上述源目录） |
 
 ## 导入范围
 

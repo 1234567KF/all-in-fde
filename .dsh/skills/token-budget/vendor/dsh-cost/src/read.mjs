@@ -78,11 +78,45 @@ export function stripTags(prompt) {
   return String(prompt || '').replace(/#(task|arm|run)\s*[:=：]\s*[A-Za-z0-9_.:@-]+/gi, '').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * 会话日志是首尾相接的多个 zstd 帧（每条事件一帧），整文件单帧解压会报
+ * "Unknown frame descriptor"。这里按帧魔数切分逐帧解压再拼接；单帧文件走同一路径也成立。
+ */
+function decompressSessionLog(buf) {
+  const magic = Buffer.from([0x28, 0xb5, 0x2f, 0xfd]);
+  const marks = [];
+  let cursor = 0;
+  while ((cursor = buf.indexOf(magic, cursor)) !== -1) {
+    marks.push(cursor);
+    cursor += 1;
+  }
+  marks.push(buf.length);
+  const parts = [];
+  let k = 0;
+  while (k < marks.length - 1) {
+    let done = false;
+    for (let m = k + 1; m < marks.length; m += 1) {
+      try {
+        const text = zlib.zstdDecompressSync(buf.subarray(marks[k], marks[m])).toString('utf8');
+        if (!text.endsWith('\n') && marks[m] !== buf.length) continue;
+        parts.push(text);
+        k = m;
+        done = true;
+        break;
+      } catch {
+        // 该边界落在帧内部，换下一个候选
+      }
+    }
+    if (!done) break;
+  }
+  return parts.join('');
+}
+
 export function readSessionFile(file) {
   const warnings = [];
   let text;
   try {
-    text = zlib.zstdDecompressSync(fs.readFileSync(file)).toString('utf8');
+    text = decompressSessionLog(fs.readFileSync(file));
   } catch (error) {
     return { id: path.basename(path.dirname(file)), file, warnings: [`解压失败：${error.message}`], calls: [], turns: [], tools: [], skills: [], subagents: [], compactions: [], extras: {} };
   }

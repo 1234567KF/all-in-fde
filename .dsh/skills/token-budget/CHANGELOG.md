@@ -1,5 +1,18 @@
 # 变更记录
 
+## [0.3.0] - 2026-11-19
+
+### Added
+
+- `scripts/stat.mjs`：按当前工作空间生成 `.dsh/dsh-cost/dashboard.html`；其他工作空间默认统计该空间全部历史，当前空间若有计费起点则按起点。
+- `stat` 动作：用户只说“统计 / 看计费 / 看板”时直接出当前工作空间看板，不需要每次让模型写 Markdown。
+- `vendor/dsh-cost` 同步到带 `dashboard`、`turns`、`scope` 的版本。
+
+### Changed
+
+- 技能描述加入“统计 / 看计费 / 看板”触发词。
+- 与已存在的 `all-in-fde` 入口对接：开工 `plan`，收尾/统计 `stat`。
+
 ## [0.2.0] - 2026-11-18
 
 ### Added

@@ -1,8 +1,8 @@
 ---
 name: token-budget
-description: Token 预算与节省策略。用户提到 token-budget、省 token、预算、成本、节省，或 all-in-fde 入口任务开始时加载；先判断类型、峰谷和读取策略，再按 playbook 执行，并可用 A/B 验证是否真省。
+description: Token 预算与节省策略。用户说“统计 / 看计费 / 看板”，或提到 token-budget、省 token、预算、成本、节省，或 all-in-fde 任务开始/收尾时加载；先判断类型与峰谷，再执行；统计时生成当前工作空间的 dashboard。
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # token-budget
@@ -19,7 +19,7 @@ node "<Base directory>/scripts/plan.mjs" --task "<用户原话>" --json
 
 按返回的 `type`、`playbook`、`model`、`effort`、`readStrategy`、`subagents` 执行。类型判断错了用 `--type doc|code|ppt|research` 覆盖。
 
-## 四个动作
+## 五个动作
 
 以下 `scripts/...` 都相对技能 Base directory。
 
@@ -29,6 +29,28 @@ node "<Base directory>/scripts/plan.mjs" --task "<用户原话>" --json
 | `brief` | `scripts/brief.mjs --goal "..." --inputs "a,b" --max-return 1500` | 子代理简报 |
 | `squeeze` | `scripts/squeeze.mjs <日志/JSON> --out <压缩文件> --json` | 可逆压缩，`retrieve <id>` 取原文 |
 | `verify` | `scripts/verify.mjs --task "<#task>"` | 调 dsh-cost 做 A/B |
+| `stat` | `scripts/stat.mjs` | 生成当前工作空间看板 |
+
+## 统计 / 看板（任何工作空间）
+
+用户只说“统计”“看计费”“看板”时，直接执行：
+
+```powershell
+node "<Base directory>/scripts/stat.mjs"
+```
+
+它按当前工作目录名生成 `<当前工作空间>/.dsh/dsh-cost/dashboard.html`，然后：
+
+- 用 `present` 把这个 HTML 作为交付物展示；
+- 或让用户双击打开，不要只在聊天里贴 Markdown 表格。
+
+范围规则：
+
+- 当前工作空间有匹配的计费起点（`epoch.workspace`）→ 按起点统计；
+- 其他工作空间 → 默认该空间全部历史；
+- 看板含总账、按日、每条 H2A 指令、A2A 子代理下钻。
+
+脚本只读会话日志，不调用模型、不产生 token。统计结果要数字时，读看板或跑 `report`，不要重新生成 Markdown 长文。
 
 ## 规则
 
@@ -42,13 +64,14 @@ node "<Base directory>/scripts/plan.mjs" --task "<用户原话>" --json
 
 ## 被 all-in-fde 入口调用
 
-以后有独立的 `all-in-fde` 入口技能时，在它的第一步加一句：
+`all-in-fde` 已存在。入口在两步调用本技能：
 
 ```text
-先加载 token-budget 技能，执行 plan，再按返回的 playbook 走。
+开工：加载 token-budget，执行 plan，按返回的 playbook 走。
+收尾/用户说统计：执行 scripts/stat.mjs，把当前工作空间看板交给用户。
 ```
 
-不需要改脚本；`plan` 会自动读当前峰谷和最近上下文压力。入口技能负责选领域技能（all-in-md、PPT、编码），本技能只负责预算和验收。
+入口负责选领域技能（all-in-md、PPT、编码）；本技能负责预算、验收和统计，不改入口的流程。
 
 ## 红线
 
@@ -60,6 +83,6 @@ node "<Base directory>/scripts/plan.mjs" --task "<用户原话>" --json
 
 ## 文件
 
-`references/policy.md`（决策表/压缩矩阵）、`references/playbook-{doc,code,ppt,research}.md`、`scripts/{plan,brief,squeeze,verify,install,doctor,package,sync-vendor}.mjs`、`vendor/dsh-cost/`。细节按需读，不要整包塞进上下文。
+`references/policy.md`（决策表/压缩矩阵）、`references/playbook-{doc,code,ppt,research}.md`、`scripts/{plan,brief,squeeze,verify,stat,install,doctor,package,sync-vendor}.mjs`、`vendor/dsh-cost/`。细节按需读，不要整包塞进上下文。
 
 绑定 dsh-cost；先跑 `scripts/doctor.mjs` 检查。

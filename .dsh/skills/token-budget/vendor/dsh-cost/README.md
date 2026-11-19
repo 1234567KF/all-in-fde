@@ -11,23 +11,81 @@ DSH 会话的精准计费与 A/B 验证工具。直接读 `~/.dsh/sessions/**/se
 
 ## 快速开始
 
+以下命令均在 **dsh-cost 目录内**执行（技能自带副本：`.dsh/skills/token-budget/vendor/dsh-cost`；独立安装则在 `~/.dsh/dsh-cost`）。在别的工作区用 `token-budget` 技能时，它会自动解析到已安装目录，无需手敲路径。
+
 ```powershell
 # 1. 增量同步（可反复跑，只读新增/变化的会话）
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs sync
+node bin/dsh-cost.mjs sync
 
 # 2. 总账
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs report
+node bin/dsh-cost.mjs report
 
 # 3. 单会话逐轮
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs session a244ad2e
+node bin/dsh-cost.mjs session a244ad2e
 
 # 4. 子代理成本树 / 技能成本 / 任务账本
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs tree
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs skills
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs tasks
+node bin/dsh-cost.mjs tree
+node bin/dsh-cost.mjs skills
+node bin/dsh-cost.mjs tasks
 ```
 
 输出都是 Markdown，直接贴文档或转 PPT。加 `--out 文件.md` 存盘。
+
+## 看哪个范围
+
+| 目的 | 命令 |
+| --- | --- |
+| 当前计费周期（reset 之后） | `report` |
+| 全部历史（忽略 reset） | `report --all` |
+| 本工作空间全部会话 | `report --all --workspace all-in-fde` |
+| 本工作空间会话清单 | `sessions --all --workspace all-in-fde` |
+| 最近 7 天 | `report --all --days 7` |
+| 子代理树 | `tree --all` |
+| 单个会话 | `session <id前缀> --all` |
+
+`--all` 只是忽略 `data/epoch.json` 的起点读全量，不会删除 epoch；下次不带 `--all` 仍然只算当前周期。
+
+## 指令明细与网页看板
+
+```powershell
+# 终端里看每条人类指令的明细
+node ...\dsh-cost.mjs turns --limit 100
+
+# 生成单文件 HTML 看板（不调用模型、不产生 token）
+node ...\dsh-cost.mjs dashboard
+# 输出：reports\dashboard.html，用浏览器直接打开
+```
+
+看板里可以按时间范围、关键词过滤，点每一行展开完整提示词、技能、子代理花费。数据更新后重跑 `dashboard` 即可，不需要我重新生成 Markdown。
+
+会话汇总里点会话标题可以下钻：先看该会话的 H2A 人类指令，再看每条指令衍生的 A2A 子代理；点 A2A 标题继续下钻，左上角“返回”回到上一层。
+
+看板是**单文件静态 HTML**，不需要启动服务。如果打开后没有数据，通常是所在预览器不执行 JavaScript；用浏览器直接打开：
+
+```powershell
+start "" "reports\dashboard.html"
+```
+
+最省事的是双击 `tools\dsh-cost\刷新看板.cmd`：本地 `sync + dashboard` 后自动用浏览器打开，**不调用模型、不产生 token**。
+
+页面已带服务端渲染的兜底数据，即使脚本被拦也能看到汇总和完整指令；下钻需要浏览器执行脚本。
+
+## 计费范围（scope）
+
+`data/epoch.json` 决定默认 `report` 算哪些会话。用 `scope` 切换，不会删 DSH 原始日志：
+
+```powershell
+# 本工作空间从 12:16 起的所有会话（新会话自动进账）
+node ...\dsh-cost.mjs scope --workspace all-in-fde --at 2026-11-18T12:16:00+08:00
+
+# 只看单个会话
+node ...\dsh-cost.mjs scope --session session-a0f5
+
+# 取消起点，默认统计全部历史
+node ...\dsh-cost.mjs scope --all
+```
+
+`scope --workspace` 写入 `mode: workspace-from-time`：之后该工作空间的新会话、子代理、老会话在此时间之后的调用都计入；其他工作空间不计。
 
 ## 自动运行（可选）
 
@@ -36,17 +94,17 @@ node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs tasks
 登录 Windows 后自动在后台同步（当前用户，无需管理员）：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "D:\all-in-fde\tools\dsh-cost\scripts\install-autostart.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\install-autostart.ps1"
 ```
 
 它注册计划任务 `DSH-Cost-Watch`：登录 30 秒后启动，每 60 秒增量同步一次，文件变化后 3 秒再补一次。
 
 ```powershell
 # 看最近一次同步时间和结果
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs status
+node bin/dsh-cost.mjs status
 
 # 移除自启（不删账本）
-powershell -NoProfile -ExecutionPolicy Bypass -File "D:\all-in-fde\tools\dsh-cost\scripts\uninstall-autostart.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\uninstall-autostart.ps1"
 ```
 
 开销：每轮只 stat 30 个会话文件、解压变化的那个，约 0.1 秒；不调用模型，不产生 token。
@@ -99,8 +157,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "D:\all-in-fde\tools\dsh-cos
 # 基线： #task=doc-01 #arm=A #run=1
 # 候选： #task=doc-01 #arm=B #run=1
 
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs compare --task doc-01 --base A --cand B
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs compare --task doc-01 --judgments bench\judgments.json
+node bin/dsh-cost.mjs compare --task doc-01 --base A --cand B
+node bin/dsh-cost.mjs compare --task doc-01 --judgments bench\judgments.json
 ```
 
 判定规则（写死在 `src/ab.mjs`）：
@@ -121,14 +179,14 @@ node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs compare --task doc-01 --judgm
 
 ```powershell
 # 先看会删什么、起点是哪
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset --dry-run
+node bin/dsh-cost.mjs reset --dry-run
 
 # 从当前会话开始（含本会话已产生的调用）
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset
+node bin/dsh-cost.mjs reset
 
 # 从指定时刻开始（此刻归零，本会话此前的调用也不计）
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset --at now
-node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset --at 2026-11-18T12:00:00+08:00
+node bin/dsh-cost.mjs reset --at now
+node bin/dsh-cost.mjs reset --at 2026-11-18T12:00:00+08:00
 ```
 
 `reset` 会：

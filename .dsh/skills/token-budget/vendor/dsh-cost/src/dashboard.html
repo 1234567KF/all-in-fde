@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSH 计费看板</title>
+<style>
+  :root { color-scheme: light; --ink:#18212f; --muted:#667085; --line:#e4e7ec; --bg:#f6f7f9; --panel:#fff; --accent:#1f5eff; --good:#0a7f52; --warn:#b54708; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.55 -apple-system,"Segoe UI",Roboto,"Helvetica Neue","Microsoft YaHei",sans-serif; }
+  header { padding:22px 28px 16px; background:var(--panel); border-bottom:1px solid var(--line); }
+  h1 { margin:0 0 4px; font-size:22px; letter-spacing:.2px; }
+  .sub { color:var(--muted); font-size:12.5px; }
+  main { padding:20px 28px 48px; max-width:1500px; margin:0 auto; }
+  .cards { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card .k { color:var(--muted); font-size:12px; }
+  .card .v { font-size:23px; font-weight:650; margin-top:4px; font-variant-numeric:tabular-nums; }
+  .card .n { color:var(--muted); font-size:11.5px; margin-top:2px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:18px; }
+  .panel h2 { margin:0 0 12px; font-size:15px; }
+  .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .controls input, .controls select { border:1px solid var(--line); border-radius:7px; padding:7px 10px; font:inherit; background:#fff; color:inherit; }
+  .controls input[type=search] { min-width:260px; flex:1; }
+  .pill { color:var(--muted); font-size:12px; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th, td { text-align:left; padding:8px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { position:sticky; top:0; background:#fbfcfd; color:var(--muted); font-weight:600; white-space:nowrap; z-index:1; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tr.turn { cursor:pointer; }
+  tr.turn:hover { background:#f8faff; }
+  tr.detail > td { background:#fbfcff; padding:0 8px 12px; }
+  .prompt { max-width:520px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .detailbox { border-left:3px solid var(--accent); padding:10px 12px; margin:6px 0; background:#fff; }
+  .detailbox pre { white-space:pre-wrap; word-break:break-word; margin:6px 0 0; font:12.5px/1.55 ui-monospace,Consolas,monospace; max-height:360px; overflow:auto; }
+  .meta { color:var(--muted); font-size:12px; }
+  .tag { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:1px 7px; margin-right:4px; font-size:11px; color:var(--muted); }
+  .good { color:var(--good); } .warn { color:var(--warn); }
+  .bars { display:flex; gap:8px; align-items:flex-end; height:90px; padding-top:6px; overflow-x:auto; }
+  .bar { min-width:26px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px; color:var(--muted); font-size:10px; }
+  .bar i { display:block; width:18px; background:#9db7ff; border-radius:3px 3px 0 0; }
+  .empty { color:var(--muted); padding:18px 4px; }
+  .link { background:none; border:0; padding:0; color:var(--accent); font:inherit; cursor:pointer; text-align:left; }
+  .link:hover { text-decoration:underline; }
+  .modal { position:fixed; inset:0; background:rgba(16,24,40,.55); display:flex; align-items:center; justify-content:center; padding:18px; z-index:20; }
+  .modal[hidden] { display:none; }
+  .modal-body { background:#fff; width:min(1120px,96vw); max-height:90vh; overflow:auto; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+  .modal-head { position:sticky; top:0; background:#fff; border-bottom:1px solid var(--line); padding:14px 18px; display:flex; gap:12px; align-items:center; justify-content:space-between; z-index:2; }
+  .modal-head h2 { margin:0; font-size:16px; }
+  .modal-head .actions { display:flex; gap:8px; }
+  .btn { border:1px solid var(--line); background:#fff; border-radius:7px; padding:6px 10px; font:inherit; cursor:pointer; }
+  .btn:hover { background:#f6f7f9; }
+  .modal-content { padding:16px 18px 24px; }
+  .turn-card { border:1px solid var(--line); border-radius:9px; padding:10px 12px; margin:10px 0; background:#fff; }
+  .turn-card summary { cursor:pointer; font-weight:600; }
+  .turn-card pre { white-space:pre-wrap; word-break:break-word; background:#fbfcff; border:1px solid var(--line); border-radius:6px; padding:10px; max-height:300px; overflow:auto; font:12.5px/1.55 ui-monospace,Consolas,monospace; }
+  .a2a { border-left:3px solid #9db7ff; padding:4px 0 4px 10px; margin:6px 0 6px 8px; }
+  .a2a-title { font-weight:600; }
+  .calls { margin-top:8px; }
+  .calls th, .calls td { font-size:11.5px; padding:4px 6px; }
+  .section-title { margin:18px 0 6px; font-size:14px; }
+  @media (max-width:1000px) { .cards { grid-template-columns:repeat(2,minmax(0,1fr)); } .prompt { max-width:260px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>DSH 计费看板</h1>
+  <div class="sub">范围：<span id="scope"></span> · 生成于 <span id="gen"></span> · 数据来自本机会话日志，不调用模型</div>
+</header>
+<main>
+  <section class="cards">
+    <div class="card"><div class="k">总花费</div><div class="v" id="c-cost">__SSR_COST__</div><div class="n" id="c-cost-note">__SSR_COST_NOTE__</div></div>
+    <div class="card"><div class="k">指令数 / 调用数</div><div class="v" id="c-turns">__SSR_TURNS__</div><div class="n" id="c-calls">__SSR_CALLS_NOTE__</div></div>
+    <div class="card"><div class="k">输出 tokens</div><div class="v" id="c-out">__SSR_OUT__</div><div class="n" id="c-out-note">__SSR_OUT_NOTE__</div></div>
+    <div class="card"><div class="k">缓存命中率</div><div class="v" id="c-hit">__SSR_HIT__</div><div class="n" id="c-hit-note">__SSR_HIT_NOTE__</div></div>
+    <div class="card"><div class="k">高峰占比</div><div class="v" id="c-peak">__SSR_PEAK__</div><div class="n">高峰单价约为低谷 2 倍</div></div>
+  </section>
+
+  <section class="panel">
+    <h2>按日花费</h2>
+    <div class="bars" id="bars">__SSR_BARS__</div>
+  </section>
+
+  <section class="panel">
+    <h2>指令明细</h2>
+    <div class="controls">
+      <input id="q" type="search" placeholder="搜索指令 / 会话 / 任务标签">
+      <select id="range"><option value="all">全部时间</option><option value="1">最近 1 天</option><option value="7">最近 7 天</option><option value="30">最近 30 天</option></select>
+      <label class="pill"><input id="humans" type="checkbox" checked> 只看人类指令</label>
+      <span class="pill" id="count">__SSR_COUNT__</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th>时间</th><th>会话</th><th class="num">轮</th><th>指令</th><th class="num">步</th>
+        <th class="num">未命中</th><th class="num">命中</th><th class="num">输出</th><th class="num">命中率</th><th class="num">花费</th>
+      </tr></thead>
+      <tbody id="rows">__SSR_ROWS__</tbody>
+    </table>
+    <div class="empty" id="empty" hidden>没有匹配的指令</div>
+    <noscript><div class="panel" style="margin-top:14px"><h2>完整指令（无脚本视图）</h2>__SSR_DETAILS__</div></noscript>
+  </section>
+
+  <section class="panel">
+    <h2>会话汇总</h2>
+    <table>
+      <thead><tr><th>开始</th><th>会话</th><th>工作区</th><th class="num">轮</th><th class="num">调用</th><th class="num">花费</th><th class="num">命中率</th><th class="num">子代理</th></tr></thead>
+      <tbody id="sessions">__SSR_SESSIONS__</tbody>
+    </table>
+  </section>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-body">
+    <div class="modal-head">
+      <h2 id="m-title">会话明细</h2>
+      <div class="actions">
+        <button class="btn" id="m-back" hidden>返回</button>
+        <button class="btn" id="m-close">关闭</button>
+      </div>
+    </div>
+    <div class="modal-content" id="m-content"></div>
+  </div>
+</div>
+<script id="payload" type="application/json">__DSH_COST_DATA__</script>
+<script>
+(() => {
+  const DATA = JSON.parse(document.getElementById('payload').textContent);
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => '¥' + Number(n || 0).toLocaleString('zh-CN', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  const num = (n) => Number(n || 0).toLocaleString('zh-CN');
+  const pct = (n) => (n === null || n === undefined ? '—' : (n * 100).toFixed(1) + '%');
+  const time = (ms) => new Date(ms).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const state = { q: '', range: 'all', humans: true };
+
+  $('scope').textContent = DATA.scope;
+  $('gen').textContent = new Date(DATA.generatedAt).toLocaleString('zh-CN');
+  const total = DATA.totals;
+  $('c-cost').textContent = money(total.cost);
+  $('c-cost-note').textContent = total.peakCost ? `其中高峰 ${money(total.peakCost)}（${pct(total.peakCost / total.cost)}）` : '无高峰花费';
+  $('c-turns').textContent = num(total.turns);
+  $('c-calls').textContent = `${num(total.calls)} 次模型调用`;
+  $('c-out').textContent = num(total.tokens.out);
+  $('c-out-note').textContent = `未命中 ${num(total.tokens.miss)} · 命中 ${num(total.tokens.hit)}`;
+  $('c-hit').textContent = pct(total.hitRate);
+  $('c-hit-note').textContent = '命中输入 / 全部输入';
+  $('c-peak').textContent = total.cost ? pct(total.peakCost / total.cost) : '—';
+
+  const maxDay = Math.max(...DATA.days.map((d) => d.cost), 0.000001);
+  $('bars').innerHTML = DATA.days.map((d) => `<div class="bar" title="${esc(d.date)} ${money(d.cost)}"><i style="height:${Math.max(2, Math.round((d.cost / maxDay) * 72))}px"></i><span>${esc(d.date.slice(5))}</span></div>`).join('');
+
+  function filtered() {
+    const now = Date.now();
+    const cutoff = state.range === 'all' ? 0 : now - Number(state.range) * 86400000;
+    const q = state.q.trim().toLowerCase();
+    return DATA.turns.filter((t) => {
+      if (t.time < cutoff) return false;
+      if (state.humans && !t.prompt) return false;
+      if (!q) return true;
+      return [t.prompt, t.preview, t.sessionTitle, t.task, t.arm, t.run, ...(t.skills || [])].join(' ').toLowerCase().includes(q);
+    });
+  }
+
+  function render() {
+    const rows = filtered();
+    $('count').textContent = `${rows.length} 条`;
+    $('empty').hidden = rows.length > 0;
+    $('rows').innerHTML = rows.map((t, i) => {
+      const preview = t.preview || t.prompt.slice(0, 90) || '(自动续跑)';
+      const tags = [t.task && `#${esc(t.task)}`, t.arm && `arm=${esc(t.arm)}`, ...(t.skills || []).map(esc)].filter(Boolean).map((x) => `<span class="tag">${x}</span>`).join('');
+      return `<tr class="turn" data-i="${i}">
+        <td>${time(t.time)}</td>
+        <td title="${esc(t.sessionId)}"><button class="link" data-session="${esc(t.sessionId)}">${esc(t.sessionTitle)}</button></td>
+        <td class="num">${t.turn}</td>
+        <td><div class="prompt">${esc(preview)}</div>${tags}</td>
+        <td class="num">${t.steps}</td>
+        <td class="num">${num(t.tokens.miss)}</td>
+        <td class="num">${num(t.tokens.hit)}</td>
+        <td class="num">${num(t.tokens.out)}</td>
+        <td class="num">${pct(t.hitRate)}</td>
+        <td class="num">${money(t.cost)}</td>
+      </tr>
+      <tr class="detail" hidden><td colspan="10"><div class="detailbox">
+        <div class="meta">${esc(t.sessionTitle)} · 轮 ${t.turn} · ${time(t.time)} · ${Math.round(t.wallMs / 1000)}s · 自身 ${money(t.ownCost)}${t.subagentCost ? ` · 子代理 ${money(t.subagentCost)}` : ''}</div>
+        ${t.task || t.arm || t.run ? `<div class="meta">任务：${esc(t.task || '—')} ${t.arm ? '· arm=' + esc(t.arm) : ''} ${t.run ? '· run=' + esc(t.run) : ''}</div>` : ''}
+        ${t.skills && t.skills.length ? `<div class="meta">技能：${t.skills.map(esc).join('、')}</div>` : ''}
+        <pre>${esc(t.prompt || '(这一轮没有人类提示词，可能是自动续跑)')}</pre>
+      </div></td></tr>`;
+    }).join('');
+  }
+
+  $('rows').addEventListener('click', (event) => {
+    if (event.target.closest('[data-session]')) return;
+    const row = event.target.closest('tr.turn');
+    if (!row) return;
+    const detail = row.nextElementSibling;
+    if (detail && detail.classList.contains('detail')) detail.hidden = !detail.hidden;
+  });
+  $('q').addEventListener('input', (e) => { state.q = e.target.value; render(); });
+  $('range').addEventListener('change', (e) => { state.range = e.target.value; render(); });
+  $('humans').addEventListener('change', (e) => { state.humans = e.target.checked; render(); });
+
+  $('sessions').innerHTML = DATA.sessions.map((s) => `<tr>
+    <td>${time(s.start)}</td><td><button class="link" data-session="${esc(s.id)}">${esc(s.title)}</button></td><td>${esc(s.workspace || '')}</td>
+    <td class="num">${s.turns}</td><td class="num">${num(s.calls)}</td><td class="num">${money(s.cost)}</td>
+    <td class="num">${pct(s.hitRate)}</td><td class="num">${s.children || '—'}</td>
+  </tr>`).join('');
+
+  const DETAILS = DATA.details || {};
+  let stack = [];
+  const modal = $('modal');
+  const mBack = $('m-back');
+  function childButton(id) {
+    const c = DETAILS[id];
+    if (!c) return '';
+    return `<button class="link" data-session="${esc(id)}">${esc(c.agentLabel || c.title)}</button> <span class="meta">${money(c.cost)} · ${c.turns} 轮 · ${num(c.calls)} 次调用</span>`;
+  }
+  function tree(d) {
+    if (!d.childIds || !d.childIds.length) return '';
+    return d.childIds.map((id) => {
+      const c = DETAILS[id];
+      if (!c) return '';
+      return `<div class="a2a"><div class="a2a-title">${childButton(id)}</div>${tree(c)}</div>`;
+    }).join('');
+  }
+  function callsTable(rows) {
+    if (!rows || !rows.length) return '<div class="meta">没有逐次调用</div>';
+    return `<table class="calls"><thead><tr><th>时间</th><th>步</th><th>模型</th><th class="num">未命中</th><th class="num">命中</th><th class="num">输出</th><th class="num">花费</th></tr></thead><tbody>${rows.map((c) => `<tr><td>${time(c.time)}</td><td>${c.step ?? '—'}</td><td>${esc(c.model || '')}</td><td class="num">${num(c.miss)}</td><td class="num">${num(c.hit)}</td><td class="num">${num(c.out)}</td><td class="num">${money(c.cost)}</td></tr>`).join('')}</tbody></table>`;
+  }
+  function renderSession() {
+    const d = DETAILS[stack.at(-1)];
+    if (!d) return;
+    $('m-title').textContent = d.title;
+    const isChild = d.origin === 'subagent' || d.depth > 0;
+    let html = `<div class="meta">${esc(d.workspace || '')} · 开始 ${time(d.start)} · 花费 ${money(d.cost)}（自身 ${money(d.ownCost)}） · ${d.turns} 轮 / ${num(d.calls)} 次调用 · 命中率 ${pct(d.hitRate)}${d.parentId ? ` · 父会话 ${esc(d.parentId)}` : ''}</div>`;
+    html += `<h3 class="section-title">${isChild ? 'A2A 指令' : 'H2A 人类指令'}（${d.turnRows.length}）</h3>`;
+    if (!d.turnRows.length) html += '<div class="meta">这个会话没有可展示的轮次</div>';
+    for (const t of d.turnRows) {
+      html += `<details class="turn-card"><summary>第 ${t.turn} 轮 · ${time(t.start)} · ${money(t.cost)} · ${num(t.tokens.miss + t.tokens.hit + t.tokens.out)} tokens${t.childIds.length ? ` · A2A ${t.childIds.length}` : ''}</summary>
+        <div class="meta">${t.steps} 步 · 墙钟 ${Math.round(t.wallMs / 1000)}s · 自身 ${money(t.ownCost)}${t.subagentCost ? ` · 子代理 ${money(t.subagentCost)}` : ''}${t.skills.length ? ' · 技能 ' + t.skills.map(esc).join('、') : ''}</div>
+        <pre>${esc(t.prompt || '(没有人类提示词，可能是自动续跑)')}</pre>
+        ${callsTable(t.callRows)}
+        ${t.childIds.length ? `<div class="meta">这一轮衍生的 A2A：</div>${t.childIds.map((id) => `<div class="a2a">${childButton(id)}</div>`).join('')}` : ''}
+      </details>`;
+    }
+    html += `<h3 class="section-title">A2A 子代理树</h3>${tree(d) || '<div class="meta">没有子代理</div>'}`;
+    $('m-content').innerHTML = html;
+  }
+  function openSession(id) {
+    if (!DETAILS[id]) return;
+    stack.push(id);
+    modal.hidden = false;
+    mBack.hidden = stack.length <= 1;
+    renderSession();
+  }
+  function closeModal() {
+    modal.hidden = true;
+    stack = [];
+  }
+  mBack.addEventListener('click', () => {
+    if (stack.length > 1) {
+      stack.pop();
+      mBack.hidden = stack.length <= 1;
+      renderSession();
+    } else closeModal();
+  });
+  $('m-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) closeModal();
+  });
+  $('m-content').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-session]');
+    if (button) openSession(button.dataset.session);
+  });
+  $('sessions').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-session]');
+    if (button) openSession(button.dataset.session);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

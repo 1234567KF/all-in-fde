@@ -301,6 +301,39 @@ export function renderOverview(ledger, view, { title = 'Token 账单' } = {}) {
   return lines.join('\n');
 }
 
+export function renderTurns(ledger, view, { limit = 200 } = {}) {
+  const rows = view.rootTurns
+    .map(({ session, turn }) => {
+      const tokens = {
+        miss: turn.tokens.miss + turn.subagentsTokens.miss,
+        hit: turn.tokens.hit + turn.subagentsTokens.hit,
+        out: turn.tokens.out + turn.subagentsTokens.out,
+      };
+      return {
+        session,
+        turn,
+        tokens,
+        cost: turn.totalCost,
+        preview: turn.promptPreview || (turn.prompt ? '' : '(自动续跑)'),
+        skills: turn.skills || [],
+      };
+    })
+    .sort((a, b) => b.turn.start - a.turn.start)
+    .slice(0, limit);
+  const lines = ['# 指令明细', '', '> 每一行是一条人类指令（轮）；点击列宽有限，完整内容用 `dashboard` 网页看。', ''];
+  lines.push('| 时间 | 会话 | 轮 | 指令 | 步 | 未命中 | 命中 | 输出 | 命中率 | 花费 |');
+  lines.push('| --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |');
+  for (const row of rows) {
+    const turn = row.turn;
+    lines.push(
+      `| ${fmtTime(turn.start, ledger.pricing.peakRule.timezone)} | ${escapeCell(row.session.title || row.session.id.slice(0, 12))} | ${turn.turn} | ${escapeCell(row.preview)} | ${turn.steps} | ${fmtInt(row.tokens.miss)} | ${fmtInt(row.tokens.hit)} | ${fmtInt(row.tokens.out)} | ${fmtPct(hitRate(row.tokens))} | ${fmtMoney(row.cost)} |`,
+    );
+  }
+  lines.push('');
+  lines.push('> 完整的提示词、技能、子代理花费用：`node dsh-cost.mjs dashboard` 生成网页。');
+  return lines.join('\n');
+}
+
 export function renderSessions(ledger, view) {
   const lines = ['## 会话列表', '', '> 每行只算该会话自身的调用；子代理单列。父会话合计（含子代理）用 `tree` 看。', '', '| 会话 | 工作区 | 开始 | 花费 | 轮 | 命中率 | 标题 |', '| --- | --- | --- | ---: | ---: | ---: | --- |'];
   const rows = view.sessions

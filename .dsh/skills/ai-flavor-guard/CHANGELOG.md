@@ -12,5 +12,5 @@
 
 ### Added
 
-- 首次归档：从 `D:\all-in-fde\.dsh\skills\ai-flavor-guard`（指向 `D:\all-in-md\.qoder\skills\ai-flavor-guard` 的目录联接）导入 6 个文件。
+- 首次归档：从本机 ai-flavor-guard 技能目录（目录联接，指向原工作区的技能源目录）导入 6 个文件。
 - 新增本仓库旁注文件 `META.json`、`PROVENANCE.md`、`CHANGELOG.md`。

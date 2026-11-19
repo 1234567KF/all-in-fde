@@ -4,7 +4,7 @@
 > 别处当系统提示 / 写作规则 / 审稿清单。规则真相源在 `SKILL.md`，词库真相源在
 > `references/lexicon.md`，预算数值真相源在 `references/contexts.md`。
 > 改那三处时 MUST 同步本文件；本文件与它们冲突时，以那三处为准。
-> 在 Qoder 内使用时直接加载 SKILL.md，不必粘贴本文件。
+> 在 DSH 内使用时直接加载 SKILL.md，不必粘贴本文件。
 
 ## 零、先判断语境
 
