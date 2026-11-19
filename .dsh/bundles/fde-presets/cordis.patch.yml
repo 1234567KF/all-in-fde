@@ -73,6 +73,8 @@
                   toolName: subagent
                   modelSelection: true
                   modelDiscovery: true
+                  agentOptions:
+                    reasoningEffort: low
                   agentPreset: fde-worker
                   allowedAgentPresets:
                     - fde-worker

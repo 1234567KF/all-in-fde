@@ -4,6 +4,19 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.5.0] - 2026-11-19
+
+### Changed
+
+- 四个 PPT 类技能移出分发：`dashi-ppt`、`guizang-ppt`、`html-ppt`、`ppt-master` 从 `.dsh/skills/` 移除，本机留档在 `archive/skills/`（不进版本库）。四者合计约 170 MB，是 `giget` 下载失败的主因。
+- 随仓库分发的技能变为 5 个：`all-in-fde`、`ai-flavor-guard`、`token-budget`、`ponytail`、`rea-video`，整包不到 1 MB。
+- 移出技能的元数据保留在 `docs/skills/<name>.json`；完整来源说明可用 `git show v0.4.0:.dsh/skills/<name>/PROVENANCE.md` 取回。
+- `INSTALL.md` 的全局安装与单技能命令改用 `.dsh/skills` 子路径。
+
+### Notes
+
+- 实测 `npx giget@latest gh:1234567KF/all-in-fde` 在 58 MB 的包上反复报 `zlib: unexpected end of file`，换 token、清 npx 缓存都复现；瘦身后下载恢复正常。
+
 ## [0.4.0] - 2026-11-19
 
 ### Changed

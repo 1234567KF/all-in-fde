@@ -4,9 +4,10 @@
 
 ## 当前状态
 
-- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.4.0`。
-- 9 个技能、1 个预设包在版本控制内，装好即用。
-- **`dashi-ppt` 和 `ai-flavor-guard` 没有许可证，但已经随仓库公开**。这是当前最需要处理的事，见 [NOTICE.md](NOTICE.md)。
+- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.5.0`。
+- 5 个技能、1 个预设包在版本控制内，装好即用，整包不到 1 MB。
+- **`ai-flavor-guard` 没有许可证，但已经随仓库公开**。这是当前最需要处理的事，见 [NOTICE.md](NOTICE.md)。
+- 四个 PPT 类技能体积过大、拖垮下载，已移出分发，见 [SKILLS.md](SKILLS.md)。
 
 ## 安装
 
@@ -20,7 +21,7 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 
 ```text
 <项目路径>\.dsh\
-├── skills\      9 个技能，含各自的脚本与依赖
+├── skills\      5 个技能，含各自的脚本与依赖
 └── bundles\     fde-presets 子代理预设
 ```
 
@@ -36,25 +37,23 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 │   │   ├── ai-flavor-guard/
 │   │   ├── token-budget/
 │   │   ├── ponytail/
-│   │   ├── rea-video/
-│   │   ├── dashi-ppt/
-│   │   ├── guizang-ppt/
-│   │   ├── html-ppt/
-│   │   └── ppt-master/
+│   │   └── rea-video/
 │   └── bundles/fde-presets/ DSH 子代理预设（fde-lead / fde-worker / fde-qa）
 ├── SKILLS.md                技能索引
 ├── skills.json              机器可读清单：版本、许可、上游、指纹
 ├── scripts/                 校验、索引生成、临时目录清理
-├── docs/                    技能规范、版本策略、发布清单
+├── docs/                    技能规范、版本策略、发布清单、已移出技能的元数据
 ├── .github/                 PR 模板与 CI 校验
 ├── .tmp/                    临时产物，可整目录清空（不进版本库）
-├── archive/                 归档文档（不进版本库）
+├── archive/                 归档文档与已移出分发的技能（不进版本库）
 ├── deliverables/            交付产物（不进版本库）
 ├── tools/                   本地工具（不进版本库）
 └── .dsh/ 下其他目录          会话、备份等运行数据（不进版本库）
 ```
 
 ## 技能清单
+
+`giget` 下载的是这 5 个：
 
 | 技能 | 版本 | 许可证 | 上游 |
 | --- | --- | --- | --- |
@@ -63,10 +62,8 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 | `token-budget` | 0.2.0 | MIT | 自研（预算层） |
 | `ponytail` | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | `rea-video` | 0.1.0 | Apache-2.0 | [JuneYaooo/rea-video](https://github.com/JuneYaooo/rea-video) |
-| `dashi-ppt` | 0.4.14 | 未声明 | 本地安装包 |
-| `guizang-ppt` | 0.1.0 | AGPL-3.0 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) |
-| `html-ppt` | 0.1.0 | MIT | [lewislulu/html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) |
-| `ppt-master` | 6.9.0 | MIT | [hugohe3/ppt-master](https://github.com/hugohe3/ppt-master) |
+
+`dashi-ppt`、`guizang-ppt`、`html-ppt`、`ppt-master` 不随下载分发，原因与找回方式见 [SKILLS.md](SKILLS.md)。
 
 ## 为什么只有一份
 

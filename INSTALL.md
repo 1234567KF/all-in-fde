@@ -24,11 +24,11 @@ macOS / Linux 同一句，路径换成 `"<项目路径>"` 即可。
 所有项目都能用：
 
 ```powershell
-npx giget@latest gh:1234567KF/all-in-fde/skills "$env:USERPROFILE\.dsh\skills"
+npx giget@latest gh:1234567KF/all-in-fde/.dsh/skills "$env:USERPROFILE\.dsh\skills"
 ```
 
 ```bash
-npx giget@latest gh:1234567KF/all-in-fde/skills "$HOME/.dsh/skills"
+npx giget@latest gh:1234567KF/all-in-fde/.dsh/skills "$HOME/.dsh/skills"
 ```
 
 只要技能、不要文档和脚本时，用这条更省事。
@@ -36,8 +36,14 @@ npx giget@latest gh:1234567KF/all-in-fde/skills "$HOME/.dsh/skills"
 ## 只装一个技能
 
 ```powershell
-npx giget@latest gh:1234567KF/all-in-fde/skills/token-budget "<项目路径>\.dsh\skills\token-budget"
+npx giget@latest gh:1234567KF/all-in-fde/.dsh/skills/token-budget "<项目路径>\.dsh\skills\token-budget"
 ```
+
+## 为什么可以这样装
+
+仓库根就是 `.dsh` 的上级目录，`.dsh/skills/` 里是技能、`.dsh/bundles/` 里是预设。下载到哪里，那里就是一个能加载的 DSH 工作区，所以不需要安装器、同步脚本或打包步骤。
+
+下载内容不到 1 MB：`.dsh/` 里只有 5 个轻量技能和预设包。四个 PPT 类技能体积过大、会让下载不稳定，已移出分发，见 [SKILLS.md](SKILLS.md)。
 
 ## 装完验证
 
