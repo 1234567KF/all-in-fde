@@ -4,9 +4,9 @@
 
 ## 当前状态
 
-- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.5.0`。
+- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.6.0`。
 - 5 个技能、1 个预设包在版本控制内，装好即用，整包不到 1 MB。
-- **`ai-flavor-guard` 没有许可证，但已经随仓库公开**。这是当前最需要处理的事，见 [NOTICE.md](NOTICE.md)。
+- 5 个技能都有明确许可证，公开分发没有阻塞项，见 [NOTICE.md](NOTICE.md)。
 - 四个 PPT 类技能体积过大、拖垮下载，已移出分发，见 [SKILLS.md](SKILLS.md)。
 
 ## 安装
@@ -58,7 +58,7 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 | 技能 | 版本 | 许可证 | 上游 |
 | --- | --- | --- | --- |
 | `all-in-fde` | 0.1.0 | MIT | 自研（入口技能） |
-| `ai-flavor-guard` | 0.1.0 | 未声明 | 本地自研 |
+| `ai-flavor-guard` | 0.1.1 | MIT | 本地自研 |
 | `token-budget` | 0.2.0 | MIT | 自研（预算层） |
 | `ponytail` | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | `rea-video` | 0.1.0 | Apache-2.0 | [JuneYaooo/rea-video](https://github.com/JuneYaooo/rea-video) |

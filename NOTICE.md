@@ -6,15 +6,13 @@
 
 | 技能 | 版本 | 许可证 | 上游 | 能否公开分发 |
 | --- | --- | --- | --- | --- |
-| `all-in-fde` | 0.1.0 | MIT | 自研 | 可以 |
+| `all-in-fde` | 0.2.1 | MIT | 自研 | 可以 |
 | `token-budget` | 0.2.0 | MIT | 自研 | 可以 |
+| `ai-flavor-guard` | 0.1.1 | MIT | 自研 | 可以，保留 `LICENSE` 与版权声明 |
 | `ponytail` | 5.3.3 | MIT | https://github.com/DietrichGebert/ponytail | 可以，保留 `LICENSE` 与版权声明 |
 | `rea-video` | 0.1.0 | Apache-2.0 | https://github.com/JuneYaooo/rea-video | 可以，保留 `LICENSE` 与版权声明 |
-| `ai-flavor-guard` | 0.1.0 | 未声明 | 本地自研 | **暂不可以**，缺许可证 |
 
-## 需要处理的一项
-
-**仓库已经公开，`ai-flavor-guard` 目前处于公开可见状态。** 技能由本仓库作者维护，但目录里没有 `LICENSE`。两条路：补一份许可证（例如沿用仓库的 MIT），或从公开仓库删除该目录。
+5 个随包技能全部有明确许可证，公开分发没有阻塞项。
 
 ## 已移出分发的技能
 
@@ -37,6 +35,6 @@
 | --- | --- |
 | `ppt-master` | `SKILL.md` frontmatter 的 `metadata.version` |
 | `dashi-ppt` | `SKILL.md` 正文与 `project/distribution-source.json` 的 `0.4.14` |
-| `guizang-ppt`、`html-ppt`、`ai-flavor-guard` | 上游未声明版本，按导入顺序记为 `0.1.0`，本仓库自有版本从 `0.1.0` 起算 |
+| `guizang-ppt`、`html-ppt` | 上游未声明版本，按导入顺序记为 `0.1.0` |
 
 移出分发的三个技能，元数据保留在 `docs/skills/`，完整来源说明仍可用 `git show v0.4.0:.dsh/skills/<name>/PROVENANCE.md` 取出。

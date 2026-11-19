@@ -5,6 +5,8 @@
 | `verify-evidence.mjs` | 可用 | 校验证据文件 shape、ID 全集、门级一致性 |
 | `e0-selfcheck.mjs` | 可用 | 环境自检，三态退出码 0/1/2 |
 | `check-tickets.mjs` | 可用 | 票依赖图：引用存在、无环、列出可开工的根票 |
+| `ensure-tmp.mjs` | 可用 | 建 `.fde-tmp/` 并写进本机 `.git/info/exclude`（幂等，支持 worktree） |
+| `clean-tmp.mjs` | 可用 | 清理工作区 `.fde-tmp/`：预览、`--all`、`--older-than N` |
 | `seed-demo` | 随脚手架落地 | 单源造数，dev-only；依赖脚手架的表结构 |
 | `e2e-run` | 随脚手架落地 | 双 project 跑批，依赖 Playwright 配置 |
 

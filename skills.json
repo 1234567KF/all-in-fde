@@ -1,32 +1,32 @@
 {
   "schemaVersion": 1,
   "totalSkills": 5,
-  "totalFiles": 90,
-  "totalBytes": 442563,
+  "totalFiles": 93,
+  "totalBytes": 452661,
   "skills": [
     {
       "name": "ai-flavor-guard",
-      "version": "0.1.0",
-      "license": "UNLICENSED",
-      "redistributable": false,
+      "version": "0.1.1",
+      "license": "MIT",
+      "redistributable": true,
       "description": "按文体与语境控制中文文本的 AI 味词汇，生成或改写长文前加载。",
       "entry": "SKILL.md",
       "upstream": null,
-      "files": 9,
-      "bytes": 80473,
-      "sha256": "ad2826e92a576f93804fceaf5eb96ce385ffe04a0a36c05501ec89a1656b92f7"
+      "files": 10,
+      "bytes": 81446,
+      "sha256": "fa4b99001f241dbd23b3b1b27dd4100a9daae49fd90ee4f929c0a9e4c9acb616"
     },
     {
       "name": "all-in-fde",
-      "version": "0.1.0",
+      "version": "0.2.1",
       "license": "MIT",
       "redistributable": true,
       "description": "把一段需求推进到可验收的小型 IT 系统：填需求采集表 → 拆票 → PRD/原型 → 逐票实现自测 → 冷启动验收 → 交付。",
       "entry": "SKILL.md",
       "upstream": null,
-      "files": 19,
-      "bytes": 70368,
-      "sha256": "bf723dc8d70bc07e9b525b8630522ec5e5fcbe6eef1a491e18ee5df6900cefe1"
+      "files": 21,
+      "bytes": 79493,
+      "sha256": "209b49da8066870d9e6033740001ce6eb7bbfa821f59e6a877f60dd3a02be603"
     },
     {
       "name": "ponytail",

@@ -4,6 +4,17 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.6.0] - 2026-11-19
+
+### Added
+
+- `ai-flavor-guard` 补 MIT 许可证（0.1.1），`META.json` 改为 `license: MIT`、`redistributable: true`。5 个随包技能现在都有明确许可证，公开分发不再有阻塞项。
+
+### Changed
+
+- `NOTICE.md` 移除「需要处理的一项」，随包技能表补齐许可证与版本。
+- 归档 `all-in-fde` 0.2.1：新增 `scripts/ensure-tmp.mjs`（`.fde-tmp/` 写入本机 exclude）、`scripts/clean-tmp.mjs`，四份 reference 补临时产物落点。
+
 ## [0.5.0] - 2026-11-19
 
 ### Changed
