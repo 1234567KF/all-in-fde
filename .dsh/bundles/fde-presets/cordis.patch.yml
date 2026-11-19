@@ -71,6 +71,8 @@
                 config:
                   provider: spawn
                   toolName: subagent
+                  modelSelection: true
+                  modelDiscovery: true
                   agentPreset: fde-worker
                   allowedAgentPresets:
                     - fde-worker

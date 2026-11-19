@@ -18,7 +18,7 @@ metadata:
 | QA | `fde-qa` | 独立复核 + 冷启动 + E2E；只读审代码 |
 | 人 | —— | 拍板、走查、封卡 |
 
-派发写法：用 `subagent` 工具，`agent_preset` 填 `fde-worker`（实现票）或 `fde-qa`（验收票），一次只派一张票，同一批文件不派两个 Worker。
+派发写法：用 `subagent` 工具，`agent_preset` 填 `fde-worker`（实现票）或 `fde-qa`（验收票），一次只派一张票，同一批文件不派两个 Worker；同时按票的类型定推理档（`off`/`low`/`high`/`max`，见 `references/slice.md` 的「派发时定档」），别一律拉满。
 
 **预设没装时不能卡住**：三个预设是可选增强。检测不到 `fde-worker`，就退回同会话执行——单票项目本来就该同屏做完；检测不到 `fde-qa`，就由人按 `references/verify.md` 逐项走查。退回时在自测报告写一句「预设未装，同屏执行」。
 

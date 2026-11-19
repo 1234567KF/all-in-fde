@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "totalSkills": 9,
   "totalFiles": 13943,
-  "totalBytes": 101017115,
+  "totalBytes": 101018025,
   "skills": [
     {
       "name": "ai-flavor-guard",
@@ -25,8 +25,8 @@
       "entry": "SKILL.md",
       "upstream": null,
       "files": 19,
-      "bytes": 67318,
-      "sha256": "0413f6ef7edc266363a58017ad2c82bab299a3465741f5765e80e68ed9f71aad"
+      "bytes": 68228,
+      "sha256": "ba25de5792b133f0cac3291887e3aa0f5c4a86a402ebeb46e45eb2e2cfde1b14"
     },
     {
       "name": "dashi-ppt",
