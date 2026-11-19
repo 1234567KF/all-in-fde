@@ -390,7 +390,7 @@ Worker 交票时附一段，格式固定：
 | `e2e-run` | 双 project 跑批 + 汇总 | 0/1 |
 | `verify-evidence` | 按 schema 校验证据、按 ID 全集比对 | 0/1 |
 
-前两个现在就能写；后四个随技能落地，放在 `skills/all-in-fde/scripts/`，不用 shell 魔术。
+前两个现在就能写；后四个随技能落地，放在 `.dsh/skills/all-in-fde/scripts/`，不用 shell 魔术。
 
 ---
 

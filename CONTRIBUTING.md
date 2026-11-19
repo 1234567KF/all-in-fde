@@ -2,10 +2,11 @@
 
 ## 目录约定
 
-- 一个技能一个目录，目录名等于 `SKILL.md` frontmatter 里的 `name`，用 kebab-case。
+- 一个技能一个目录，放在 `.dsh/skills/` 下，目录名等于 `SKILL.md` frontmatter 里的 `name`，用 kebab-case。
 - 必需文件：`SKILL.md`、`META.json`、`PROVENANCE.md`、`CHANGELOG.md`。
 - 可选目录：`references/`、`scripts/`、`assets/`、`templates/`。
 - 不提交 `node_modules/`、`dist/`、`output/`、日志和本地配置。已在 `.gitignore` 里列出。
+- 技能要自包含：外部依赖放进技能自己的子目录（例如 `token-budget/vendor/dsh-cost`），不要引用仓库外的路径。
 
 完整的文件职责和字段定义见 [docs/skill-spec.md](docs/skill-spec.md)。
 
@@ -43,13 +44,14 @@ chore(skills): 同步 skills.json
 
 ```powershell
 node scripts/check-skills.mjs
+node scripts/check-links.mjs
+node scripts/check-public-artifacts.mjs
 node scripts/sync-index.mjs
-node scripts/sync-runtime.mjs --check
 git status --short
 ```
 
 `check-skills.mjs` 报错时不要提交。缺许可证记为警告，标记 `redistributable: true` 却没有许可证才是错误；两类情况都记在 [NOTICE.md](NOTICE.md)。
 
-`sync-runtime.mjs --check` 有差异时说明 `.dsh/skills` 落后了，跑一次不带参数的命令补上。装了 `.githooks/post-commit` 之后这步由提交钩子自动完成，规则见 [docs/runtime-sync.md](docs/runtime-sync.md)。
+仓库里只有 `.dsh/skills/` 一份技能：改它就是改运行时，不需要再同步到别处。`skills.json` 是脚本生成的，改完技能记得重跑 `sync-index.mjs`。
 
 临时产物写进 `.tmp/`，不要留在技能目录或仓库根；清理用 `node scripts/clean-tmp.mjs`。

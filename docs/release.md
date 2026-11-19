@@ -37,7 +37,7 @@ GitHub 单文件上限 100 MB，仓库建议 1 GB 以内。当前快照约 115 M
 
 - [ ] `.github/workflows/validate.yml` 在仓库推上去后能跑通。
 - [ ] 打开分支保护，要求 `validate-skills` 通过才能合并。
-- [ ] 确认 `skills/**` 的 `linguist-vendored` 标记生效，语言统计不被第三方技能占满。
+- [ ] 确认 `.dsh/skills/**` 的 `linguist-vendored` 标记生效，语言统计不被第三方技能占满。
 
 ## 6 发布前最后一遍
 

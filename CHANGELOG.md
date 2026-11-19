@@ -4,6 +4,22 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.4.0] - 2026-11-19
+
+### Changed
+
+- 仓库根改成 DSH 工作区：技能从 `skills/` 迁到 `.dsh/skills/`，预设从 `bundles/` 迁到 `.dsh/bundles/`。`npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"` 下载完即得到可直接加载的 `.dsh`，不再有源码副本与运行时副本两份。
+- 索引文件移到仓库根：`skills/skills.json` → `skills.json`，`skills/README.md` → `SKILLS.md`。
+- 校验脚本与文档同步改用 `.dsh/skills` 路径；`.gitattributes` 的 vendored 标记跟着改。
+
+### Removed
+
+- 删除 `scripts/sync-runtime.mjs`、`.githooks/post-commit`、`docs/runtime-sync.md`：两份副本合并成一份后，同步与钩子没有存在意义。
+
+### Notes
+
+- 运行时另行安装、不属于本仓库的技能（`graphify`）按名字列进 `.gitignore`，不随仓库分发。
+
 ## [0.3.0] - 2026-11-19
 
 ### Added

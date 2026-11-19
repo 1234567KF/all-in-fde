@@ -2,7 +2,7 @@
 
 ## 目录名
 
-`skills/<name>/`，`<name>` 与 `SKILL.md` frontmatter 的 `name` 完全一致，只用小写字母、数字和连字符。
+`.dsh/skills/<name>/`，`<name>` 与 `SKILL.md` frontmatter 的 `name` 完全一致，只用小写字母、数字和连字符。
 
 ## 文件职责
 
@@ -67,8 +67,8 @@ metadata:
 
 ## 仓库级文件
 
-- `skills/skills.json`：由 `scripts/sync-index.mjs` 生成，不要手改。记录每个技能的文件数、字节数和内容指纹，用来发现未登记的改动。
-- `skills/README.md`：技能索引，人工维护的表格。
+- `skills.json`：由 `scripts/sync-index.mjs` 生成，位于仓库根，不要手改。记录每个技能的文件数、字节数和内容指纹，用来发现未登记的改动。
+- `SKILLS.md`：技能索引，人工维护的表格。
 
 ## 禁止事项
 

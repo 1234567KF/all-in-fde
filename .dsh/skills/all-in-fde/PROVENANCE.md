@@ -6,7 +6,7 @@
 
 ## 依据
 
-- 设计：[`docs/all-in-fde-方案-v0.3.md`](../../docs/all-in-fde-方案-v0.3.md)（架构）与 [`docs/all-in-fde-v1-实现方案.md`](../../docs/all-in-fde-v1-实现方案.md)（实现）。
+- 设计：[`docs/all-in-fde-方案-v0.3.md`](../../../docs/all-in-fde-方案-v0.3.md)（架构）与 [`docs/all-in-fde-v1-实现方案.md`](../../../docs/all-in-fde-v1-实现方案.md)（实现）。
 - 借鉴：gspowers（导航与恢复）、mattpocock/skills（判据、依赖边、触发词）、Super-agent（Router/Worker/注意力/看门狗）、一份真实多端项目的任务拆解与 E2E 方法。内部出处见 `archive/notes/调研出处.md`（不外发）。
 
 ## 资产

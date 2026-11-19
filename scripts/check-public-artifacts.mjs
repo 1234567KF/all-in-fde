@@ -3,9 +3,9 @@
  * 对外产物净化检查：技能交付物里不许出现内网地址、本地绝对路径、内部仓库/项目名。
  *
  * 用法：
- *   node scripts/check-public-artifacts.mjs            # 检查默认范围（对外产物：skills/all-in-fde）
+ *   node scripts/check-public-artifacts.mjs            # 检查默认范围（对外产物：.dsh/skills/all-in-fde）
  *   node scripts/check-public-artifacts.mjs <路径...>   # 指定文件或目录
- *   node scripts/check-public-artifacts.mjs --all       # 顺带扫 skills/ 下的全部技能（第三方技能会有误报）
+ *   node scripts/check-public-artifacts.mjs --all       # 顺带扫 .dsh/skills/ 下的全部技能（第三方技能会有误报）
  *
  * 退出码：0 干净；1 有命中。
  *
@@ -38,11 +38,11 @@ const argv = process.argv.slice(2);
 const all = argv.includes('--all');
 const targets = argv.filter((a) => !a.startsWith('--'));
 if (all) {
-  targets.push(join(repoRoot, 'skills'));
+  targets.push(join(repoRoot, '.dsh', 'skills'));
 }
 if (targets.length === 0) {
   targets.push(
-    join(repoRoot, 'skills', 'all-in-fde'),
+    join(repoRoot, '.dsh', 'skills', 'all-in-fde'),
   );
 }
 

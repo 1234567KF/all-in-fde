@@ -1,5 +1,0 @@
-#!/bin/sh
-# 提交成功后把仓库副本同步到运行时目录，保证 .dsh/skills 不落后。
-# 启用：git config core.hooksPath .githooks
-# 跳过：git commit --no-verify 不生效（post-commit 无此机制），临时停用改 core.hooksPath。
-node scripts/sync-runtime.mjs --quiet || echo "同步运行时失败，请手动运行 node scripts/sync-runtime.mjs"

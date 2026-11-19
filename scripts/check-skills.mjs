@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 校验 skills/ 下的技能目录是否满足 docs/skill-spec.md 与 docs/versioning.md。
+ * 校验 .dsh/skills/ 下的技能目录是否满足 docs/skill-spec.md 与 docs/versioning.md。
  *
  * 用法：node scripts/check-skills.mjs
  * 退出码：0 通过（可能有警告），1 有错误。
@@ -10,8 +10,10 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const skillsDir = join(repoRoot, 'skills');
+const skillsDir = join(repoRoot, '.dsh', 'skills');
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'output', 'uploads']);
+// 运行时另行安装、不受本仓库管理的技能，按名字跳过（同步维护 .gitignore 里的同名条目）
+const SKIP_SKILLS = new Set(['graphify']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const REQUIRED = ['SKILL.md', 'META.json', 'PROVENANCE.md', 'CHANGELOG.md'];
 const META_FIELDS = ['name', 'version', 'entry', 'description', 'license', 'redistributable'];
@@ -65,12 +67,12 @@ function walk(dir, acc = { files: 0, bytes: 0 }) {
 }
 
 const entries = readdirSync(skillsDir, { withFileTypes: true })
-  .filter((e) => e.isDirectory() && !SKIP_DIRS.has(e.name))
+  .filter((e) => e.isDirectory() && !SKIP_DIRS.has(e.name) && !SKIP_SKILLS.has(e.name))
   .map((e) => e.name)
   .sort();
 
 if (entries.length === 0) {
-  console.error('skills/ 下没有技能目录');
+  console.error('.dsh/skills/ 下没有技能目录');
   process.exit(1);
 }
 
@@ -158,7 +160,7 @@ for (const skill of entries) {
   index[skill] = { version: meta.version, license: meta.license, redistributable: meta.redistributable };
 }
 
-const indexPath = join(skillsDir, 'skills.json');
+const indexPath = join(repoRoot, 'skills.json');
 if (existsSync(indexPath)) {
   try {
     const json = JSON.parse(readFileSync(indexPath, 'utf8'));

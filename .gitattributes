@@ -26,4 +26,4 @@
 *.zst   binary
 
 # 第三方技能快照：不参与 git 的语言统计
-skills/** linguist-vendored
+.dsh/skills/** linguist-vendored

@@ -225,7 +225,7 @@
 
 ### 4.1 一个入口：`token-budget` 薄技能
 
-> 已落地为 `skills/token-budget/`（技能名 `token-budget`）：`plan` / `brief` / `squeeze` / `verify` 四个动作，`scripts/` 下为无依赖 Node 实现，`references/` 为按需加载的策略与 playbook。`all-in-fde` 入口以后存在时，在它第一步加载本技能即可。
+> 已落地为 `.dsh/skills/token-budget/`（技能名 `token-budget`）：`plan` / `brief` / `squeeze` / `verify` 四个动作，`scripts/` 下为无依赖 Node 实现，`references/` 为按需加载的策略与 playbook。`all-in-fde` 入口以后存在时，在它第一步加载本技能即可。
 
 不要做“七个 always-on 规则文件”。做一个薄入口，只负责三件事：**判断、分发、验收**。
 

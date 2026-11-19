@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * 生成 skills/skills.json：从各技能的 META.json 汇总版本、许可、上游、文件数和内容指纹。
+ * 生成 skills.json：从各技能的 META.json 汇总版本、许可、上游、文件数和内容指纹。
  *
  * 用法：
- *   node scripts/sync-index.mjs          重写 skills/skills.json
+ *   node scripts/sync-index.mjs          重写 skills.json
  *   node scripts/sync-index.mjs --check  只比对，不一致时退出码 1
  */
 import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
@@ -12,8 +12,8 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const skillsDir = join(repoRoot, 'skills');
-const indexPath = join(skillsDir, 'skills.json');
+const skillsDir = join(repoRoot, '.dsh', 'skills');
+const indexPath = join(repoRoot, 'skills.json');
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'output', 'uploads']);
 const checkOnly = process.argv.includes('--check');
 
@@ -91,7 +91,7 @@ if (checkOnly) {
 }
 
 writeFileSync(indexPath, text, 'utf8');
-console.log(`已写入 skills/skills.json：${skills.length} 个技能，${payload.totalFiles} 个文件，${(totalBytes / 1024 / 1024).toFixed(1)} MB`);
+console.log(`已写入 skills.json：${skills.length} 个技能，${payload.totalFiles} 个文件，${(totalBytes / 1024 / 1024).toFixed(1)} MB`);
 for (const s of skills) {
   console.log(`  ${s.name.padEnd(18)} ${String(s.version).padEnd(10)} ${s.license.padEnd(12)} ${(s.bytes / 1024 / 1024).toFixed(1)} MB`);
 }

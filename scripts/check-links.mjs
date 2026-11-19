@@ -3,7 +3,7 @@
  * 检查 Markdown 里的相对链接是否可达。外链与锚点不检查。
  *
  * 用法：node scripts/check-links.mjs [目录或文件...]
- * 默认范围：docs/ 与 skills/all-in-fde；第三方技能见 --all
+ * 默认范围：docs/ 与 .dsh/skills/all-in-fde；第三方技能见 --all
  * 退出码：0 全通；1 有死链。
  */
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-const targets = argv.length ? argv : [join(repoRoot, 'docs'), join(repoRoot, 'skills', 'all-in-fde')];
+const targets = argv.length ? argv : [join(repoRoot, 'docs'), join(repoRoot, '.dsh', 'skills', 'all-in-fde')];
 const SKIP = new Set(['node_modules', '.git', '.venv', 'venv', '__pycache__']);
 
 function walk(target, acc) {
