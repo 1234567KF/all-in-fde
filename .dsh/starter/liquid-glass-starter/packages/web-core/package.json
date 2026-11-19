@@ -1,0 +1,50 @@
+{
+  "name": "@workspace/web-core",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./lib/*": "./src/lib/*.ts",
+    "./router/*": "./src/router/*.tsx",
+    "./services/*": "./src/services/*.ts",
+    "./stores/*": "./src/stores/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --cache --cache-strategy content",
+    "lint:nocache": "eslint . --no-cache",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.105.3",
+    "axios": "^1.21.0",
+    "shared": "*",
+    "sonner": "^2.0.8",
+    "zustand": "^5.0.16"
+  },
+  "peerDependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vitest/coverage-istanbul": "^5.1.0",
+    "happy-dom": "^21.0.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "name": "liquid-glass-monorepo",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "bun --filter web dev",
+    "dev:api": "bun --filter api dev",
+    "dev": "bun run build:shared && bun run scripts/run-web-task.ts dev",
+    "build:shared": "bun --filter shared build",
+    "build:web": "bun run scripts/run-web-task.ts build",
+    "build:api": "bun --filter api build",
+    "build": "bun run build:shared && bun run build:api && bun run build:web",
+    "db:reset": "bun --filter api db:reset",
+    "db:seed-dev": "bun --filter api db:seed-dev",
+    "check": "bun run typecheck && bun run lint && bun --filter api migrate:check && bun run arch:check && bun run test",
+    "typecheck": "bun run build:shared && bun --filter './packages/*' typecheck && bun run scripts/run-web-task.ts typecheck && bun --filter api typecheck && bun run typecheck:scripts",
+    "lint": "bun run scripts/run-web-task.ts lint && bun --filter api lint && bun --filter './packages/*' lint && bun run lint:scripts",
+    "lint:nocache": "bun run scripts/run-web-task.ts lint:nocache && bun --filter api lint:nocache && bun --filter './packages/*' lint:nocache && bun run lint:scripts",
+    "lint:fix": "bun run scripts/run-web-task.ts lint:fix && bun --filter api lint:fix && bun --filter './packages/*' lint:fix && bun run lint:fix:scripts",
+    "arch:check": "bun run scripts/arch-check.ts",
+    "gen:module": "bun run scripts/gen-module.ts",
+    "remove:module": "bun run scripts/gen-module.ts --remove",
+    "remove:web": "bun run scripts/remove-web.ts",
+    "add:web": "bun run scripts/add-web.ts",
+    "test": "bun run test:eslint && bun run test:scripts && bun run test:shared && bun run test:ui && bun run test:web-core && bun run test:web && bun run test:api",
+    "test:ci": "bun run scripts/run-ci-tests.ts",
+    "test:eslint": "bun test eslint-rules/ --parallel",
+    "test:api": "cd apps/api && bun test src/",
+    "test:api:coverage": "cd apps/api && bun test src/ --coverage",
+    "test:scripts": "bun test scripts/ skills/project-scaffolder/scripts/ --parallel",
+    "imports:prune": "bun run scripts/prune-unused-imports.ts",
+    "test:web": "bun run scripts/run-web-task.ts test",
+    "test:coverage": "bun run scripts/run-web-task.ts test:coverage",
+    "test:shared": "cd packages/shared && bunx vitest run",
+    "test:ui": "cd packages/ui && bunx vitest run",
+    "test:web-core": "cd packages/web-core && bunx vitest run",
+    "prepare": "husky",
+    "typecheck:scripts": "cd apps/api && bunx tsc --noEmit -p ../../scripts/tsconfig.json",
+    "lint:scripts": "eslint scripts/gen-module.ts scripts/gen-module.test.ts scripts/gen-module scripts/lib scripts/features.ts scripts/strip-features.ts scripts/strip-features.test.ts scripts/prune-unused-imports.ts scripts/prune-unused-imports.test.ts scripts/run-ci-tests.ts scripts/ci-manifest.test.ts scripts/run-web-task.ts scripts/collect-web-dist.ts scripts/web-apps.test.ts scripts/remove-web.ts scripts/remove-web.test.ts scripts/add-web.ts scripts/add-web.test.ts",
+    "lint:fix:scripts": "eslint --fix scripts/gen-module.ts scripts/gen-module.test.ts scripts/gen-module scripts/lib scripts/features.ts scripts/strip-features.ts scripts/strip-features.test.ts scripts/prune-unused-imports.ts scripts/prune-unused-imports.test.ts scripts/run-ci-tests.ts scripts/ci-manifest.test.ts scripts/run-web-task.ts scripts/collect-web-dist.ts scripts/web-apps.test.ts scripts/remove-web.ts scripts/remove-web.test.ts scripts/add-web.ts scripts/add-web.test.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.14.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "globals": "^17.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "typescript-eslint": "^8.72.1"
+  },
+  "lint-staged": {
+    "packages/*/src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "apps/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{css,json,md}": [
+      "prettier --write"
+    ]
+  }
+}

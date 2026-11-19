@@ -1,0 +1,26 @@
+services:
+  liquid-glass-starter:
+    image: registry.example.com/liquid-glass/liquid-glass-starter:latest
+    container_name: liquid-glass-starter
+    restart: unless-stopped
+    ports:
+      # 宿主对外端口 WEB_PORT（默认 11070）→ 容器内 server 监听 3000
+      # 11070 是模板自身 self-deploy 保留端口；scaffold 出的新项目由 skill 自动分配 11081+
+      - "${WEB_PORT:-11070}:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      # 打触达 DB 的 /api/health：迁移失败或数据目录权限问题会让容器直接
+      # unhealthy，避免数据库起不来但部署仍报健康。
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

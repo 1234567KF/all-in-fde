@@ -1,0 +1,30 @@
+services:
+  liquid-glass-starter:
+    # CI 传入 PREPROD_IMAGE_TAG=pre-prod-<SHA> 精确锁定本次晋级的镜像；未传则回落 moving tag。
+    # 手工精确回滚必须同时给环境变量：PREPROD_IMAGE_TAG=pre-prod-<SHA> ./deploy.sh pre-prod-<SHA>
+    # （deploy.sh 的 $1 只决定 docker pull 哪个镜像，实际启动的读这里的插值）
+    image: registry.example.com/liquid-glass/liquid-glass-starter:${PREPROD_IMAGE_TAG:-pre-prod}
+    container_name: liquid-glass-starter-preprod
+    restart: unless-stopped
+    ports:
+      # 预发布机沿用项目已分配端口（scaffold 写死至此）；与测试机同机时改部署目录 .env 的 WEB_PORT
+      - "${WEB_PORT:-11070}:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      # 打触达 DB 的 /api/health：迁移失败或数据目录权限问题会让容器直接
+      # unhealthy，deploy.sh 不必等业务请求才发现数据库起不来。
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    # 预发布机在外网，走 registry 拉取（deploy.sh registry 模式），不走内网测试机的 tar 加载
+    pull_policy: always

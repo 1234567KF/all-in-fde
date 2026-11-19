@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover：内容延伸到刘海/圆角区，需要让位的布局用 env(safe-area-inset-*)。
+         桌面与非全面屏上 insets 为 0，无副作用。 -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Liquid Glass Design System</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      // 首屏前置应用主题，避免刷新时先闪默认色。
+      // key 与 @workspace/ui 的 components/providers/theme-provider、lib/theme-colors 保持一致。
+      // 主题偏好刻意不按端隔离，多个端共用同一套外观。
+      ;(function () {
+        try {
+          var theme = localStorage.getItem("theme")
+          var resolvedTheme =
+            theme === "light" || theme === "dark"
+              ? theme
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light"
+          document.documentElement.classList.add(resolvedTheme)
+
+          var themeColor = localStorage.getItem("theme-color")
+          document.documentElement.dataset.themeColor = themeColor || "green"
+        } catch (_) {
+          // localStorage 不可用（隐私模式等）时交给 ThemeProvider 处理
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>

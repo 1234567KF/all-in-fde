@@ -1,0 +1,519 @@
+# ── Liquid Glass Starter CI/CD Pipeline ──
+#
+# 触发方式:
+#   1. Push 到仓库（自动）
+#   2. GitLab 手动触发（Web UI）
+#   3. 定时任务（CI/CD > Schedules）
+#
+# 所需 CI/CD Variables:
+#   FLOW_WEBHOOK_URL              - 阿里云 Flow 流水线 Webhook 地址（生产用）
+#                                   ⚠️ 模板项目不跑生产，替换为真值后再启用 deploy-prod
+#   G_TEST_SERVER_SSH_PKEY   - 内网测试机 SSH 私钥内容（GitLab 全局变量，被 TEST_SSH_PKEY 继承）
+#   G_PREPROD_SSH_PKEY  - 外网预发布机 SSH 私钥内容（GitLab 全局变量，被 PREPROD_SSH_PKEY 继承）
+#   PREPROD_HOST                  - 外网预发布机地址；保持 REPLACE_ME 即关闭预发布链路
+#                                   配成真值后 main 不再 push registry，改由 pre-prod 分支晋级
+#                                   ⚠️ 这是唯一必须按项目配置的预发布变量
+#                                      （其余 4 个见下方 variables 的默认值，PATH 由 scaffold 按项目名写死）
+#                                   想给整组项目默认开启，就配到组级 Variables 里
+#
+# 部署架构（双分支，默认）:
+#   main  → build 打 test-latest → SSH 内网测试机 docker load/up
+#           push-registry 并行推 $SHA + test-latest 到阿里云
+#   prod  → retag 复用 main 已构建的 $SHA 打 latest → 阿里云 Flow Webhook 部署（生产）
+#
+# 部署架构（三分支，配置 PREPROD_HOST 后启用）:
+#   main     → build 只产出 tar artifact + image.sha，不 push registry → SSH 内网测试机
+#   pre-prod → promote-preprod 跨流水线取 main 的 tar，断言 image.sha == 本分支 HEAD
+#              → push pre-prod-$SHA（不可变）+ pre-prod（moving）
+#              → deploy-preprod SSH 外网预发布机，由它从 registry 拉取 pre-prod-$SHA 启动
+#   prod     → retag 复用 pre-prod-$SHA 打 latest → Flow Webhook
+#
+#   ⚠️ 三分支模式下 main → pre-prod → prod 必须逐级 Fast-Forward 合并（勿 Squash / Merge commit），
+#      SHA 相等是「测试通过的镜像 == 预发布运行的镜像 == 生产运行的镜像」的唯一保障。
+
+workflow:
+  rules:
+    # 避免同一分支 push + MR 双流水线：有关联 MR 的 push 跳过。
+    # pre-prod / prod 必须豁免：开着 pre-prod → prod 的 MR 时再合入 pre-prod，
+    # 该 commit 仍带 CI_OPEN_MERGE_REQUESTS，不豁免会让晋级流水线被静默吞掉。
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_OPEN_MERGE_REQUESTS && $CI_COMMIT_BRANCH != "pre-prod" && $CI_COMMIT_BRANCH != "prod"
+      when: never
+    - when: always
+
+stages:
+  - check
+  - build
+  - deploy
+
+variables:
+  FLOW_WEBHOOK_URL: "http://REPLACE_WITH_YOUR_PROVIDER_WEBHOOK"
+  IMAG_REG: "registry.example.com/liquid-glass"
+  IMAGE_TAG: "$IMAG_REG/liquid-glass-starter:$CI_COMMIT_SHA"
+  # 内网测试机（SSH 部署）——此处为默认保底值；
+  # 新项目如需换机器，在 GitLab 项目 Settings > CI/CD > Variables 配置同名变量即可覆盖，无需改本文件
+  TEST_HOST: "192.0.2.10"
+  TEST_PORT: "2222"
+  TEST_USER: "ExampleOrg"
+  TEST_PATH: "/srv/deploy/liquid-glass-starter"
+  # 测试机 SSH 私钥（实例级全局变量）。换测试机时连密钥一起覆盖，无需改本文件
+  TEST_SSH_PKEY: "$G_TEST_SERVER_SSH_PKEY"
+  # 外网预发布机（SSH 部署 + 由它自己从 registry 拉镜像）——默认 REPLACE_ME = 关闭整条预发布链路，
+  # 此时 main 照旧 push registry、prod 照旧复用 main 的 $SHA 镜像（双分支模型，行为与启用前一致）。
+  # 在 GitLab Settings > CI/CD > Variables 配 PREPROD_HOST 真值即切换为三分支模型。
+  # ⚠️ PREPROD_* 若设为 Protected，pre-prod 必须是保护分支：取不到值时 PREPROD_HOST
+  #    回落这里的 REPLACE_ME，promote-preprod / deploy-preprod 会整个不出现在流水线里（不是 job 报错）。
+  PREPROD_HOST: "REPLACE_ME"
+  PREPROD_PORT: "2222"
+  PREPROD_USER: "ExampleOrg"
+  PREPROD_PATH: "/srv/deploy/liquid-glass-starter-preprod"
+  # 团队预发布机有独立密钥（与内网测试机不同）；复用测试机密钥的项目在 UI 覆盖
+  # 注意 Type 必须是 Variable（不是 File），详见 ci-guide §2
+  PREPROD_SSH_PKEY: "$G_PREPROD_SSH_PKEY"
+  # 晋级产物：不可变 SHA tag 供预发布机 / prod 精确消费与人工回滚，moving tag 作当前预发布指针
+  PREPROD_SHA_TAG: "$IMAG_REG/liquid-glass-starter:pre-prod-$CI_COMMIT_SHA"
+  PREPROD_TAG: "$IMAG_REG/liquid-glass-starter:pre-prod"
+  # CI 里所有 ssh/scp 必须带：认证失败 / 端口不对 / 网络不可达时 15s 内报错退出。
+  # 不带的话 ssh 会无限等交互输入（stderr 被重定向时更是一点线索都没有），
+  # 实测在错误端口上挂死过 14 分钟，白占一个 runner。
+  SSH_OPTS: "-o BatchMode=yes -o ConnectTimeout=15"
+
+# ── Stage .pre: 依赖缓存预热 ──
+# check job 的 node_modules 缓存为 pull-only，由本 job 负责创建/更新
+# 仅在 bun.lock / CI 配置变更时触发；Web 手动触发流水线可无条件重建（缓存丢失时的逃生通道）
+warm-cache:
+  stage: .pre
+  image: oven/bun:1-alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - bun.lock
+        - .gitlab-ci.yml
+    - if: $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - bun.lock
+        - .gitlab-ci.yml
+    - if: $CI_PIPELINE_SOURCE == "web"
+  cache:
+    key:
+      files:
+        - bun.lock
+    paths:
+      - node_modules/
+      - apps/*/node_modules/
+      - packages/*/node_modules/
+    policy: pull-push
+  script:
+    - bun install --frozen-lockfile --ignore-scripts
+
+# ── Stage 0: 质量门禁（ESLint + 迁移预检 + 架构约束 + 单元测试）──
+#
+# 沉淀自实战项目的 CI 趟坑经验：
+#   ▸ lint              ESLint（web + api + shared，与 lint-staged 覆盖范围一致）。
+#                       除通用规则外承载后端架构约束：
+#                       route 默认禁手写 hasPermission（动态授权例外须带理由豁免）/
+#                       modules 禁裸调 writeLog / 直接写审计的 service 函数首参须 OpCtx
+#                       （AST 降低文本匹配的脆弱性，但成员调用、别名与间接审计仍是
+#                       已知盲区；lint 通过不等于权限或审计链路已获完整验证）
+#   ▸ migrate:check     Journal / .sql / snapshot 三方一致 + 内存 SQLite 全量迁移 +
+#                       drizzle-kit 二次 generate 检测 schema.ts 漂移
+#                       （拦截手写迁移、column 冲突、缺失快照等历史事故）
+#   ▸ arch:check        UI 层禁 @/lib/api / axios / sonner 直连 + 页面必须 React.lazy
+#                       （Rule 4 是跨文件不变量——lint 单个 page 时需读 App.tsx 才能判定，
+#                       ESLint 表达不了，这是本脚本继续存在的理由）
+#   ▸ test:ci           ESLint 自定义规则 RuleTester + 前端 Vitest 覆盖率阈值 +
+#                       后端 Bun 原生覆盖率阈值
+#                       （lint 与 test:ci 的分包部分都逐包 filter 串联，引入新 workspace 后必须在
+#                       root package.json 同步补 filter，否则新包只被 lint-staged 在
+#                       commit 时扫到、CI 全绿也覆盖不到它 —— shared 曾因此长期漏网）
+check:
+  stage: check
+  image: oven/bun:1-alpine
+  # 从 istanbul text 报告抓 Web 端行覆盖率（4 列表格，不会误匹配 Bun 的 2 列表格）
+  # 供 MR widget / 覆盖率徽章 / Repository analytics 趋势图 / Coverage-Check 审批规则消费
+  coverage: '/All files\s*\|\s*[\d.]+\s*\|\s*[\d.]+\s*\|\s*[\d.]+\s*\|\s*([\d.]+)/'
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  variables:
+    # 每条 script 命令生成独立耗时 section，便于分析各步耗时
+    FF_SCRIPT_SECTIONS: "true"
+  cache:
+    # 依赖缓存只拉不传（由 warm-cache job 维护），省掉每次数万文件的回传
+    - key:
+        files:
+          - bun.lock
+      paths:
+        - node_modules/
+        - apps/*/node_modules/
+        - packages/*/node_modules/
+      policy: pull
+    # tsc 增量构建缓存：命中时 typecheck 只做增量校验
+    # （key 只随 bun.lock 变化；tsconfig/源码变化由 tsc 自身校验 buildinfo 后增量重建）
+    - key:
+        prefix: tsc
+        files:
+          - bun.lock
+      paths:
+        - .cache/tsc/
+      policy: pull-push
+  script:
+    - bun install --frozen-lockfile
+    # build:shared 由 typecheck 内部执行，避免重复构建
+    - echo '▶ 类型检查…'
+    - bun run typecheck
+    - echo '▶ ESLint（含后端架构规则）…'
+    - bun run lint
+    - echo '▶ 迁移预检…'
+    - bun --filter api migrate:check
+    - echo '▶ 架构约束检查…'
+    - bun run arch:check
+    - echo '▶ 单元测试 + 覆盖率阈值…'
+    - bun run test:ci
+
+# ── Stage 1a: 构建 Docker 镜像（main 分支） ──
+# 打 $SHA + test-latest 双标签，导出为 tar artifact，并写出 image.sha 供跨流水线同源断言
+# 由后续 push-registry (推阿里云) 与 deploy-test (SCP 到测试机) 并行消费
+# 缓解内网 Runner → 阿里云 Registry 慢推送阻塞 deploy-test 的问题
+# prod / pre-prod 分支都不重复 build，改由 retag / promote-preprod 复用 main 已构建的镜像
+# （启用预发布后 push-registry 被哨兵关闭，tar 成为 main → pre-prod 的唯一镜像载体）
+build:
+  stage: build
+  image: docker:27-cli
+  rules:
+    # 启用预发布后，pre-prod 上的 web/schedule 流水线不重复 build：
+    # 镜像一律由 promote-preprod 从 main 取，白构建只会污染 Runner 宿主的 test-latest
+    - if: $PREPROD_HOST !~ /^$|REPLACE_ME/ && $CI_COMMIT_BRANCH == "pre-prod"
+      when: never
+    # 只认 main 分支、不限来源：schedule / web 在 main 上照样构建，
+    # 在 prod / pre-prod 上触发则不构建（镜像由 retag / promote-preprod 复用）
+    - if: $CI_COMMIT_BRANCH == "main"
+  variables:
+    DOCKER_BUILDKIT: "1"
+  script:
+    - docker pull $IMAG_REG/liquid-glass-starter:latest || true
+    - echo "▶ 构建镜像 $IMAGE_TAG + $IMAG_REG/liquid-glass-starter:test-latest"
+    - |
+      docker build --compress \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        --cache-from $IMAG_REG/liquid-glass-starter:latest \
+        -t $IMAGE_TAG \
+        -t $IMAG_REG/liquid-glass-starter:test-latest \
+        .
+    - echo "▶ 导出镜像为 tar (供 push-registry + deploy-test 并行消费)"
+    - docker save $IMAGE_TAG $IMAG_REG/liquid-glass-starter:test-latest | gzip > image.tar.gz
+    - ls -lh image.tar.gz
+    # needs:project 取的是 main 上「最近一次成功的 build job」，不按 SHA 匹配，
+    # 所以必须把构建时的 SHA 随产物带出去，由 promote-preprod 断言同源
+    - printf '%s' "$CI_COMMIT_SHA" > image.sha
+    - echo "▶ 清理 Runner 宿主悬空镜像（保留 24h 内作为下次 build 缓存）"
+    - docker image prune -f --filter "until=24h" || true
+  artifacts:
+    paths:
+      - image.tar.gz
+      - image.sha
+    expire_in: 1 day
+
+# ── Stage 1b: 生产镜像复用（prod 分支） ──
+# FF 合并 → prod HEAD SHA == 上游已发布的 SHA → 直接 pull + retag + push
+# 不再重复 build，保证测试通过的镜像 == 生产运行的镜像
+# 源 tag 随模式切换：双分支取 main 构建的 $SHA；三分支取 pre-prod 晋级的 pre-prod-$SHA
+retag:
+  stage: build
+  image: docker:27-cli
+  rules:
+    - if: $FLOW_WEBHOOK_URL =~ /REPLACE_ME/
+      when: never
+    - if: $CI_COMMIT_BRANCH == "prod"
+  script:
+    - |
+      case "$PREPROD_HOST" in
+        ""|*REPLACE_ME*) SRC="$IMAGE_TAG"; UPSTREAM="main" ;;
+        *)               SRC="$PREPROD_SHA_TAG"; UPSTREAM="pre-prod" ;;
+      esac
+      echo "▶ 复用 $UPSTREAM 已发布镜像 $SRC → latest"
+      if ! docker pull "$SRC"; then
+        echo ""
+        echo "════════════════════════════════════════════════════════════"
+        echo "❌ 拉取镜像失败：$SRC"
+        echo ""
+        echo "  当前 prod HEAD SHA ($CI_COMMIT_SHA) 在 Registry 中没有对应镜像。"
+        echo "  可能原因：本次 MR 使用了 Squash / Merge commit，导致"
+        echo "  prod 的 SHA 与 $UPSTREAM 已发布的 SHA 不一致。"
+        echo ""
+        echo "  ✅ 正确做法：合并 $UPSTREAM → prod 时必须选择"
+        echo "     『Fast-forward（快进式）合并』，不要勾选『压缩提交』"
+        if [ "$UPSTREAM" = "pre-prod" ]; then
+          echo "     并确认 pre-prod 的 promote-preprod 已成功推送 pre-prod-$CI_COMMIT_SHA"
+        fi
+        echo ""
+        echo "  🛠 修复步骤："
+        echo "     1. 回退 prod 分支：git reset --hard <上一个正确的 SHA>"
+        echo "     2. 重新以 FF 方式合并 $UPSTREAM → prod"
+        echo "════════════════════════════════════════════════════════════"
+        exit 1
+      fi
+      docker tag "$SRC" "$IMAG_REG/liquid-glass-starter:latest"
+      docker push "$IMAG_REG/liquid-glass-starter:latest"
+
+# ── Stage 1c: 晋级镜像到预发布（pre-prod 分支，仅配置 PREPROD_HOST 后启用） ──
+# main 启用预发布后不再 push registry，镜像唯一载体是 build 的 tar artifact。
+# 这里用 needs:project 跨流水线取 main 最近一次成功的 build 产物（Premium+ 功能，已实机验证），
+# 再断言 image.sha == 本分支 HEAD：FF 合并 main → pre-prod 时两者天然相等，
+# Squash / Merge commit / main 已前进都会被拦下。断言通过后推不可变 SHA tag + moving tag。
+# 不产出 artifact：预发布机在外网，由 deploy-preprod 让它自己从 registry 拉取。
+promote-preprod:
+  stage: build
+  image: docker:27-cli
+  needs:
+    # 显式带 check：跨项目 need 不参与 stage 顺序，不带上会在门禁跑完前就开始晋级
+    - job: check
+    - project: $CI_PROJECT_PATH
+      job: build
+      ref: main
+      artifacts: true
+  rules:
+    # 空串也算关闭：只写 !~ /REPLACE_ME/ 会把「变量被清空」误判成已启用
+    - if: $PREPROD_HOST =~ /^$|REPLACE_ME/
+      when: never
+    - if: $CI_COMMIT_BRANCH == "pre-prod"
+  script:
+    - |
+      if [ ! -f image.sha ]; then
+        echo "❌ main 的 build 产物缺少 image.sha。"
+        echo "   请先把本次 CI 改动合入 main 并跑绿一次（产出 image.sha），再合并 pre-prod。"
+        exit 1
+      fi
+      MAIN_SHA="$(cat image.sha)"
+      if [ "$MAIN_SHA" != "$CI_COMMIT_SHA" ]; then
+        echo "❌ 镜像同源断言失败：取到的镜像不是 pre-prod HEAD 对应的构建。"
+        echo "   main 最近一次成功 build : $MAIN_SHA"
+        echo "   pre-prod HEAD           : $CI_COMMIT_SHA"
+        echo ""
+        echo "   A main 已前进 → 在 pre-prod 上执行 git merge --ff-only main（把 pre-prod 快进到 main，勿 Squash / Merge commit）"
+        echo "   B pre-prod 含非 main 提交 → 回退 pre-prod 后重新 FF 合并"
+        echo "   C main 新流水线 build 失败或 artifact 已过期 → 修好 main 流水线后重试本 job"
+        echo "   D main 的 build 还在跑 → needs:project 不等待运行中的流水线，取到的是上一次成功产物；等 main 绿了再 retry 本 job"
+        echo "   判据：git merge-base --is-ancestor $MAIN_SHA $CI_COMMIT_SHA"
+        exit 1
+      fi
+      echo "✓ 同源断言通过：$MAIN_SHA"
+    - docker load -i image.tar.gz
+    - docker tag "$IMAGE_TAG" "$PREPROD_SHA_TAG"
+    - docker tag "$IMAGE_TAG" "$PREPROD_TAG"
+    - echo "▶ 推送 $PREPROD_SHA_TAG + $PREPROD_TAG"
+    - docker push "$PREPROD_SHA_TAG"
+    - docker push "$PREPROD_TAG"
+    - echo "▶ 清理 Runner 宿主悬空镜像"
+    - docker image prune -f --filter "until=24h" || true
+
+# ── Stage 2a: 推送镜像到阿里云 Registry（main 分支，仅双分支模型） ──
+# 与 deploy-test 并行，不阻塞测试环境部署
+# prod 分支 retag job 依赖此 job 推送的 $SHA 标签（保证生产镜像同源）
+# 启用预发布后本 job 关闭：main 是开发分支、提交频繁，不再为每次构建推镜像；
+# 改由 pre-prod 分支的 promote-preprod 从 tar artifact 晋级推送
+push-registry:
+  stage: deploy
+  needs:
+    - job: build
+      artifacts: true
+  rules:
+    - if: $FLOW_WEBHOOK_URL =~ /REPLACE_ME/
+      when: never
+    - if: $PREPROD_HOST !~ /^$|REPLACE_ME/
+      when: never
+    # 只认 main：test-latest 的语义是「main 的测试镜像」，
+    # 在 prod / pre-prod 上定时或手动触发不能覆盖它
+    - if: $CI_COMMIT_BRANCH == "main"
+  image: docker:27-cli
+  script:
+    - echo "▶ 从 artifact 加载镜像"
+    - docker load -i image.tar.gz
+    - echo "▶ 推送 $IMAGE_TAG + test-latest 到阿里云"
+    - docker push $IMAGE_TAG
+    - docker push $IMAG_REG/liquid-glass-starter:test-latest
+    - echo "▶ 清理 Runner 宿主悬空镜像"
+    - docker image prune -f --filter "until=24h" || true
+
+# ── Stage 2b: 部署到内网测试机（main 分支） ──
+# 通过 SCP 传 tar 包到测试机，测试机 docker load 后启动，无需拉阿里云 Registry
+# 优点：内网 SCP ~10s vs 公网 pull ~2min
+deploy-test:
+  stage: deploy
+  needs:
+    - job: check
+    - job: build
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  image: registry.example.com/liquid-glass/ci-tools:alpine-3.20
+  before_script:
+    - echo "$TEST_SSH_PKEY" > private_key && chmod 600 private_key
+    - eval "$(ssh-agent -s)"
+    - ssh-add private_key
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -T 5 -p $TEST_PORT $TEST_HOST >> ~/.ssh/known_hosts
+  script:
+    - 'echo "▶ 确保测试机部署目录存在"'
+    - 'ssh $SSH_OPTS -p $TEST_PORT $TEST_USER@$TEST_HOST "mkdir -p $TEST_PATH"'
+    - 'echo "▶ 同步 compose + deploy.sh + 镜像 tar 包到测试机"'
+    # 模板仓库带 compose.self.yml（tmpfs 无记忆部署，空库由 init.sql 建出并自带演示数据）；
+    # scaffold 生成项目没有该文件，
+    # 回落到 compose.test.yml（./data 持久卷），保证「无记忆」规则不泄漏到新项目。
+    - |
+      if [ -f compose.self.yml ]; then
+        COMPOSE_SRC=compose.self.yml
+      else
+        COMPOSE_SRC=compose.test.yml
+      fi
+      echo "▶ 使用 ${COMPOSE_SRC} 作为测试机 compose.yml"
+      scp $SSH_OPTS -P $TEST_PORT $COMPOSE_SRC $TEST_USER@$TEST_HOST:$TEST_PATH/compose.yml
+    - 'scp $SSH_OPTS -P $TEST_PORT deploy.sh $TEST_USER@$TEST_HOST:$TEST_PATH/deploy.sh'
+    - 'scp $SSH_OPTS -P $TEST_PORT image.tar.gz $TEST_USER@$TEST_HOST:$TEST_PATH/image.tar.gz'
+    - 'echo "▶ 执行部署脚本 (tar 加载模式)"'
+    - 'ssh $SSH_OPTS -p $TEST_PORT $TEST_USER@$TEST_HOST "cd $TEST_PATH && chmod +x deploy.sh && ./deploy.sh test-latest image.tar.gz"'
+    - 'echo "✓ Test deploy done: http://$TEST_HOST:11070"'
+  environment:
+    name: test
+    url: http://$TEST_HOST:11070
+
+# ── Stage 2b: 手动重启测试环境（维护用；不重建镜像、不重新部署） ──
+# 语义 = 重启已部署服务：
+#   ▸ 模板仓库（compose.self.yml，/app/data 是 tmpfs）：重启会清空演示库，
+#     下一次健康检查触发 init.sql 并自动重新种 7 条演示通知 → 等效"重置演示数据"
+#   ▸ scaffold 生成项目（compose.test.yml，./data 持久卷）：只是重启服务，数据保留
+# 该 job 会随 --include-ci 原样进入生成项目；因为"重启服务"在两种形态下语义都成立，
+# 不需要模板专属门禁，也不会被误读成"删业务数据"。
+# 注意：docker compose restart 不会应用新的 .env / compose 配置（容器配置不变）；
+#       要升级配置或镜像请走部署流水线。
+# 使用：在该流水线的 job 列表里手动 play（流水线已结束也可以补点）。
+restart-test:
+  stage: deploy
+  needs:
+    - job: deploy-test
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+      allow_failure: true
+  image: registry.example.com/liquid-glass/ci-tools:alpine-3.20
+  before_script:
+    - echo "$TEST_SSH_PKEY" > private_key && chmod 600 private_key
+    - eval "$(ssh-agent -s)"
+    - ssh-add private_key
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -T 5 -p $TEST_PORT $TEST_HOST >> ~/.ssh/known_hosts
+  script:
+    - 'echo "▶ 重启测试环境服务（$TEST_PATH）"'
+    - 'ssh $SSH_OPTS -p $TEST_PORT $TEST_USER@$TEST_HOST "cd $TEST_PATH && docker compose restart"'
+    - |
+      echo "▶ 等待健康检查（最多 60s）…"
+      for i in $(seq 1 12); do
+        if ssh $SSH_OPTS -p $TEST_PORT $TEST_USER@$TEST_HOST "cd $TEST_PATH && docker compose ps | grep -q '(healthy)'"; then
+          echo "✓ 服务已恢复 healthy：http://$TEST_HOST:11070"
+          exit 0
+        fi
+        sleep 5
+      done
+      echo "❌ 健康检查超时（60s），最近日志："
+      ssh $SSH_OPTS -p $TEST_PORT $TEST_USER@$TEST_HOST "cd $TEST_PATH && docker compose logs --tail=50" || true
+      exit 1
+
+# ── Stage 2c: 部署到外网预发布机（pre-prod 分支，仅配置 PREPROD_HOST 后启用） ──
+# 与内网测试机不同：预发布机在外网，拉阿里云公网 Registry 很快，所以只同步 compose + deploy.sh，
+# 由它自己 docker pull 不可变的 pre-prod-$SHA 启动（不 SCP tar）。
+# compose.preprod.yml 用 ${PREPROD_IMAGE_TAG:-pre-prod} 插值，这里传入 SHA tag，
+# 保证「预发布运行的镜像 == promote-preprod 刚推送的镜像 == 将来 prod 的镜像」。
+deploy-preprod:
+  stage: deploy
+  needs:
+    - job: check
+    - job: promote-preprod
+  rules:
+    # 空串也算关闭：只写 !~ /REPLACE_ME/ 会把「变量被清空」误判成已启用
+    - if: $PREPROD_HOST =~ /^$|REPLACE_ME/
+      when: never
+    - if: $CI_COMMIT_BRANCH == "pre-prod"
+  image: registry.example.com/liquid-glass/ci-tools:alpine-3.20
+  before_script:
+    # PREPROD_HOST 为空时 rules 已把本 job 关掉，这里只可能是私钥取不到值
+    - |
+      if [ -z "$PREPROD_SSH_PKEY" ]; then
+        echo "❌ PREPROD_SSH_PKEY 为空。"
+        echo "   它默认继承实例级 G_PREPROD_SSH_PKEY；取不到值有两种可能："
+        echo "   该变量不存在，或变量勾了 Protected 而 pre-prod 不是保护分支。"
+        exit 1
+      fi
+    - echo "$PREPROD_SSH_PKEY" > private_key && chmod 600 private_key
+    - eval "$(ssh-agent -s)"
+    - ssh-add private_key
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    # -T 5：机器不可达时 5s 放弃；不重定向 stderr，让 keyscan 失败有据可查
+    - ssh-keyscan -T 5 -p $PREPROD_PORT $PREPROD_HOST >> ~/.ssh/known_hosts
+  script:
+    - 'echo "▶ 确保预发布机部署目录存在"'
+    - 'ssh $SSH_OPTS -p $PREPROD_PORT $PREPROD_USER@$PREPROD_HOST "mkdir -p $PREPROD_PATH"'
+    # 外网机不接受 deploy.sh 的 admin123 兜底建库，也不接受 dev 模式。
+    # 校验在远端跑、只回传结论，避免 .env 里的密钥进 CI 日志。
+    - |
+      ssh $SSH_OPTS -p $PREPROD_PORT $PREPROD_USER@$PREPROD_HOST "cd $PREPROD_PATH && sh -s" <<'ENV_CHECK'
+      set -eu
+      fail() {
+        echo "❌ 预发布机 .env 不合规：$1"
+        echo "   在 $PWD/.env 修好后重跑本 job（文件内容不会回传 CI）。"
+        exit 1
+      }
+      [ -f .env ] || fail "文件不存在。deploy.sh 首次部署会兜底生成写入 admin123 的 .env，公网不可接受，必须手工预置"
+      # NODE_ENV 不必写：镜像自带 ENV NODE_ENV=production。但显式写了就必须是 production——
+      # 写成 development 会跳过全部生产守卫（JWT 回落 dev-secret-key）并关闭静态托管。
+      if grep -q '^NODE_ENV=' .env && ! grep -Eq '^NODE_ENV="?production"?$' .env; then
+        fail "NODE_ENV 写了就必须是 production（不写更省事，镜像自带）。写成 development 会跳过生产守卫（JWT 回落 dev-secret-key）并关闭静态托管"
+      fi
+      if grep -q '^PORT=' .env && ! grep -Eq '^PORT="?3000"?$' .env; then
+        fail "PORT 必须是 3000。它是容器内监听端口，compose 的端口映射（WEB_PORT:3000）与健康检查都写死 3000；填别的值容器能起来但对外不通，只表现为健康检查超时。要换对外端口请改 WEB_PORT"
+      fi
+      for key in FRONTEND_URL JWT_SECRET SEED_ADMIN_PASSWORD; do
+        grep -q "^${key}=." .env || fail "缺少 ${key} 或值为空。production 启动守卫会直接 throw，表现为部署末尾 60s 健康检查超时"
+      done
+      if grep -Eq '^SEED_ADMIN_PASSWORD="?(admin123|change-me-in-production)"?$' .env; then
+        fail "SEED_ADMIN_PASSWORD 仍是测试默认值 / 示例占位值，公网不可接受"
+      fi
+      echo "✓ 预发布机 .env 校验通过"
+      ENV_CHECK
+    - 'echo "▶ 同步 compose + deploy.sh（镜像由预发布机自己从 Registry 拉取）"'
+    - 'scp $SSH_OPTS -P $PREPROD_PORT compose.preprod.yml $PREPROD_USER@$PREPROD_HOST:$PREPROD_PATH/compose.yml'
+    - 'scp $SSH_OPTS -P $PREPROD_PORT deploy.sh $PREPROD_USER@$PREPROD_HOST:$PREPROD_PATH/deploy.sh'
+    - 'echo "▶ 执行部署脚本 (Registry 拉取模式，锁定 pre-prod-$CI_COMMIT_SHA)"'
+    - 'ssh $SSH_OPTS -p $PREPROD_PORT $PREPROD_USER@$PREPROD_HOST "cd $PREPROD_PATH && chmod +x deploy.sh && PREPROD_IMAGE_TAG=pre-prod-$CI_COMMIT_SHA ./deploy.sh pre-prod-$CI_COMMIT_SHA"'
+    # 对外端口以部署目录 .env 的 WEB_PORT 为准（scaffold 写进本文件的只是默认分配值）。
+    # 读远端真值回显，避免日志报错端口误导运维。
+    - |
+      ACTUAL_PORT="$(ssh $SSH_OPTS -p $PREPROD_PORT $PREPROD_USER@$PREPROD_HOST "sed -n 's/^WEB_PORT=//p' $PREPROD_PATH/.env | tail -1" | tr -d '\"')"
+      echo "✓ Pre-prod deploy done: http://$PREPROD_HOST:${ACTUAL_PORT:-11070}"
+  environment:
+    name: pre-production
+    # 仅供 GitLab UI 展示的默认猜测：真实地址取决于 .env 的 WEB_PORT 与反代，
+    # 以本 job 日志末尾回显的 URL 为准
+    url: http://$PREPROD_HOST:11070
+
+# ── Stage 2d: 触发阿里云 Flow 部署（prod 分支 / 生产） ──
+deploy-prod:
+  stage: deploy
+  needs:
+    - job: check
+    - job: retag
+  rules:
+    - if: $FLOW_WEBHOOK_URL =~ /REPLACE_ME/
+      when: never
+    # 只认 prod 分支、不限来源（schedule / web 在 prod 上同样发布）：
+    # retag 只在 prod 上存在，needs 指向被 rules 排除的 job 会让整条流水线创建失败。
+    # 不能用 needs:optional 兜底——那会跳过 retag 把陈旧 latest 直接发上生产。
+    - if: $CI_COMMIT_BRANCH == "prod"
+  image: alpine:3.20
+  script:
+    - |
+      wget -qO- --post-data='{}' \
+        --header='Content-Type: application/json' \
+        "$FLOW_WEBHOOK_URL" && echo '✓ Deploy triggered' || exit 1
+  environment:
+    name: production

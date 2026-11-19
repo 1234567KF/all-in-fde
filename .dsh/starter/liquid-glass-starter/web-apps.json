@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "id": "web",
+      "base": "/",
+      "devPort": 5173,
+      "title": "Liquid Glass Design System"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+services:
+  liquid-glass-starter:
+    image: registry.example.com/liquid-glass/liquid-glass-starter:test-latest
+    container_name: liquid-glass-starter-test
+    restart: unless-stopped
+    ports:
+      # 模板自身测试端口 11070（self-deploy 保留）；scaffold 出的新项目由 skill 自动分配 11081+ 写死至此
+      - "${WEB_PORT:-11070}:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      # 打触达 DB 的 /api/health：迁移失败或数据目录权限问题会让容器直接
+      # unhealthy，deploy.sh 不必等业务请求才发现数据库起不来。
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    # tar 加载模式下，本地已有镜像就不再拉取（无需访问阿里云 Registry）
+    pull_policy: missing
