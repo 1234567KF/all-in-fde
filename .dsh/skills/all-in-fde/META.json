@@ -1,8 +1,8 @@
 {
   "name": "all-in-fde",
-  "version": "0.4.1",
+  "version": "0.6.0",
   "entry": "SKILL.md",
-  "description": "把一段需求推进到可验收的小型 IT 系统：填需求采集表 → 拆票 → PRD/原型 → 逐票实现自测 → 冷启动验收 → 交付。",
+  "description": "把一段需求推进到可验收的小型 IT 系统：理解卡(共脑) → 提案卡(审定) → 采集表(人审定) → PRD(人审定) → 原型(人审定) → spec(人审定) → 封版 → 切片 → 逐票实现 → 验收 → 交付。12 步流水线，6 个人审触点。",
   "license": "MIT",
   "redistributable": true,
   "upstream": null,

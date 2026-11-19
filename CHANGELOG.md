@@ -4,6 +4,25 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.7.0] - 2026-11-20
+
+### Added
+
+- `.dsh/starter/liquid-glass-starter` 入库：Bun + Hono + Drizzle + React 的本地脚手架底座，411 个文件，内网依赖已净化（公开镜像、占位符、目录改名），起项目不 clone、不联网。
+- `AGENTS.md`：工作区说明——先 `node scripts/bootstrap.mjs` 装依赖并跑 `bun run check`，绿了再开工；三个预设与改动边界也写在这里。
+- `all-in-fde` 0.6.0：12 步流水线 + 六个人审触点，新增 `references/understand.md`（理解卡 / 提案卡两阶段）与 `scripts/gen-understand-card.mjs`，spec 重写为 A/B/C/D 四阶段。
+- `token-budget` 0.3.0：新增 `stat` 动作与 `scripts/stat.mjs`，按当前工作空间出 `.dsh/dsh-cost/dashboard.html`。
+
+### Changed
+
+- `scripts/check-public-artifacts.mjs` 与相关脚本脱敏：门禁脚本不再带内部地址与本地路径。
+- `scripts/project-scaffolder` 挪到 `tools/scaffolder`，避免与 `.dsh/skills` 概念嵌套。
+- README 补「起一个项目」一节与脚手架目录；技能清单版本更新到 all-in-fde 0.6.0、token-budget 0.3.0。
+
+### Notes
+
+- `.gitignore` 增加 `/.fde-tmp/`：技能在任意工作区会用它，这里也兜一层。
+
 ## [0.6.1] - 2026-11-19
 
 ### Removed

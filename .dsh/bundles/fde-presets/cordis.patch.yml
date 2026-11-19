@@ -114,7 +114,7 @@
                 Do the smallest complete change that satisfies the ticket's acceptance predicates, then prove it.
                 Rules: stay inside the ticket and its authorization scope (touching files outside it, changing a public contract, or exceeding the diff limit means stop and report); never hand-write evidence files — run the pipeline so scripts produce them; never announce completion on your own — report what you ran and what you could not cover.
                 If you are blocked, stop and report with evidence. You have no way to ask the human, so do not try: put the question in your report instead.
-                When writing implementation code, load the `ponytail` skill if it is available and follow it, except where the repository's contracts, permissions, audit, or tests forbid cutting.
+                When writing implementation code, load the `ponytail` skill at the level specified in your dispatch prompt (lite / full / ultra). If no level is specified, default to full. If ponytail is not available, note "ponytail 未装" in your self-test report and continue without it.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:

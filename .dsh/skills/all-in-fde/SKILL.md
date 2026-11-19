@@ -1,8 +1,8 @@
 ---
 name: all-in-fde
-description: 把一段需求推进到可验收的小型 IT 系统时使用。触发：用户说「我要做个 XX 系统 / 功能 / 页面」「帮我把这个需求变成能用的东西」「我不会写代码但想要个能管 XX 的工具」「继续上次那个项目」。流程：填需求采集表让人审定 → 拆成票 → 生成 PRD 与原型 → 逐票实现并自测 → 冷启动验收 → 交付。不用于：纯咨询与写文档/PPT、给已有项目加单个字段（走脚手架领域技能）、多模块要流水线并行的大项目。
+description: 把一段需求推进到可验收的小型 IT 系统时使用。触发：用户说「我要做个 XX 系统 / 功能 / 页面」「帮我把这个需求变成能用的东西」「我不会写代码但想要个能管 XX 的工具」「继续上次那个项目」。流程：填需求采集表让人审定 → 出 PRD → 出模块 spec → 封版 → 切片分工 → 逐票实现自测 → 冷启动验收 → 交付。不用于：纯咨询与写文档/PPT、给已有项目加单个字段（走脚手架领域技能）、多模块要流水线并行的大项目。
 metadata:
-  version: "0.4.1"
+  version: "0.6.0"
 ---
 
 # all-in-fde
@@ -32,13 +32,23 @@ metadata:
 开工第一件事：扫描工作目录，按「动作产物」判断停在哪，不读记忆、不写状态字段。
 
 ```text
-无 brief.md                        → 收活（references/intake.md）
-有 brief、无采集表/PRD             → 校准（references/spec.md）
-有规格、无票                       → 切片（references/slice.md）
-有票、项目未起                     → 起架（references/scaffold.md）
-项目已起、有 todo 票               → 逐单（references/implement.md）
-全部票 done、未验收                → 验收（references/verify.md）
-验收过                            → 交付（references/delivery.md）
+无 brief.md                              → 收活·理解（references/understand.md §阶段A）
+有理解卡未确认                           → 收活·等待反馈（references/understand.md §阶段A）
+理解已确认、无提案                       → 收活·提案（references/understand.md §阶段B）
+提案已审定、无采集表                     → 收活·出采集表（references/intake.md）
+有采集表未审定                           → 校准·等人审（references/spec.md §阶段A）
+采集表已审定、无 PRD                     → 校准·出PRD（references/spec.md §阶段B）
+有 PRD 未审定                            → 校准·等人审PRD（references/spec.md §阶段B）
+PRD 已审定、无原型                       → 校准·出原型（references/spec.md §阶段B）
+有原型未审定                             → 校准·等人审原型（references/spec.md §阶段B）
+原型已审定、无 spec/                     → 校准·出spec（references/spec.md §阶段C）
+有 spec 未审定                           → 校准·等人审spec（references/spec.md §阶段C）
+spec 已审定、未封版                      → 校准·封版（references/spec.md §阶段D）
+已封版、无票                             → 切片（references/slice.md）
+有票、项目未起                           → 起架（references/scaffold.md）
+项目已起、有 todo 票                     → 逐单（references/implement.md）
+全部票 done、未验收                      → 验收（references/verify.md）
+验收过                                   → 交付（references/delivery.md）
 ```
 
 跳过动作要写进 evidence（`skipped: true` + 理由）。跳的是准备动作，出口门禁（E5、E6）不许跳。
@@ -47,17 +57,19 @@ metadata:
 
 | 动作 | 做什么 | 出口判据 | 详见 |
 | --- | --- | --- | --- |
-| 收活 | 一段话 → brief + 采集表 S0 | brief 五节齐、S0 至少一条 | intake.md |
-| 校准 | 采集表 → PRD → 原型 | 表无空表、S15 无缺口、编号可回溯 | spec.md |
-| 切片 | 规格 → 一组票 | 每票一上下文可完成、可演示、依赖无环 | slice.md |
-| 起架 | 读坐标并用脚手架生成项目（无坐标先问人，不许自建） | 空项目 `check` 绿 + E3 记 `starter` 或 `skipped` | scaffold.md |
-| 逐单 | 实现 + 自测 + 证据（起架后先看对照表） | 验收谓词逐条有证据、数据断言不为零 | implement.md、starter-map.md |
+| 收活·理解 | AI 解析需求 → 理解卡(HTML/选择题) → 人回复确认 | 理解已确认 | understand.md §A |
+| 收活·提案 | AI 出粗提案卡(HTML) → 人审定 | 提案已审定 | understand.md §B |
+| 收活·出采集表 | 提案 + 理解 → 采集表 | 采集表生成 | intake.md |
+| 校准 | 采集表(人审定) → PRD(人审定) → 原型(人审定) → spec(人审定) → 封版 | E2 四查过 + **E2.5 封版 PASS** | spec.md |
+| 切片 | PRD + spec → 一组票（分工依据是技术方案） | 每票可演示、依赖无环 | slice.md |
+| 起架 | 读坐标并用脚手架生成项目 | 空项目 `check` 绿 + E3 记 starter/skipped | scaffold.md |
+| 逐单 | 实现 + 自测 + 证据 | 验收谓词逐条有证据、数据断言不为零 | implement.md |
 | 验收 | 复核 + 冷启动 + E2E | 四步全过、卡无「有问题」 | verify.md |
 | 交付 | 三件套 + 回流 | 干净目录可起、可回滚 | delivery.md |
 
 ## 什么算做完
 
-四道阻断门：**E0 环境、E5 实现、E6 人用、E7 交付**。E1–E4 只记录、不阻断。四道门的条目、31 个 ID、证据字段与聚合规则见 `references/checklist.md`。
+五道阻断门：**E0 环境、E2.5 封版、E5 实现、E6 人用、E7 交付**。E1–E4 只记录、不阻断。门的条目、31+ 个 ID、证据字段与聚合规则见 `references/checklist.md`。
 
 证据规则：
 
@@ -72,9 +84,9 @@ metadata:
 
 最小字段见 `references/slice.md`。三条铁律：
 
-1. 切法三条判据：竖切（一条用户能演示的完整路径）、一次上下文装得下、阻塞边真实。
+1. 切法三条判据：竖切（一条用户能演示的完整路径）、一次上下文装得下、阻塞边真实。**切片依据是 PRD + spec 的整体技术方案**，不是采集表的行号。
 2. 三阶段勾选：`① AI 首轮实现` `② 人走查` `③ QA 封卡`。**AI 只能勾①**。
-3. 票挂 `REQ-`、验收引 `AC-`，不许现编编号。
+3. 票挂 `REQ-`、验收引 `AC-`，Spec 引 `spec/<module>.md#章节`，不许现编编号。
 
 ## 人的三处
 
@@ -137,10 +149,10 @@ node <技能目录>/scripts/ensure-tmp.mjs
 
 | 什么时候 | 加载什么 | 加载哪个 |
 | --- | --- | --- |
-| 按「先读现场」判断出动作 | 只加载那一个动作的 reference | `references/{intake,spec,slice,scaffold,implement,verify,delivery}.md` |
+| 按「先读现场」判断出动作 | 只加载那一个动作的 reference | `references/{understand,intake,spec,slice,scaffold,implement,verify,delivery}.md` |
 | 写证据、跑门禁、判通过 | 加载门禁手册 | `references/checklist.md` |
 | 开工 / 收尾 / 用户说统计 | 加载预算与统计 | `token-budget`（`plan` / `stat`） |
-| 进逐单、要写代码 | 额外加载 `ponytail`（full 档） | 外部技能，没装就跳过并在自测报告写「未装」 |
+| 进逐单、要写代码 | 额外加载 `ponytail`，档位随推理档联动 | off→lite / low,high→full / max→ultra；没装就跳过并在自测报告写「未装」 |
 
 三条约束：
 

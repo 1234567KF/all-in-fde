@@ -2,6 +2,7 @@
 
 | 脚本 | 状态 | 说明 |
 | --- | --- | --- |
+| `gen-understand-card.mjs` | 可用 | 生成 HTML 理解卡：接收 JSON 数据，输出单文件深色主题 HTML，用 present 展示给人确认 |
 | `verify-evidence.mjs` | 可用 | 校验证据 shape、ID 全集、门级一致性；`--strict` 把重复证据、E6-9 越权判 PASS、E5-2 日志超 20 分钟、E5-9 复核记录缺失变错误 |
 | `card-evidence.mjs` | 可用 | 验收卡 → E6 证据：人点选后带签名落盘；未点选拒绝封卡，有问题写 FAIL |
 | `e0-selfcheck.mjs` | 可用 | 环境自检，三态退出码 0/1/2 |
@@ -21,6 +22,10 @@
 ```bash
 # 1. 开工：建 .fde-tmp 并排除
 node <技能>/scripts/ensure-tmp.mjs
+
+# 1.5 收活：生成理解卡让人确认
+node <技能>/scripts/gen-understand-card.mjs --data .fde-tmp/understand.json --out .fde-tmp/understand-card.html
+# 然后用 present 工具交付 .fde-tmp/understand-card.html 给用户
 
 # 2. 切片后：查依赖与票面纪律
 node <技能>/scripts/check-tickets.mjs .fde/tickets

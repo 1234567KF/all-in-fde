@@ -1,11 +1,11 @@
 # 技能库
 
-一个可以直接下载使用的 DSH 工作区：`.dsh/skills/` 里放技能，`.dsh/bundles/` 里放子代理预设。仓库根就是 `.dsh` 的上级目录，下载到目标位置后 DSH 直接加载，不需要再复制、再安装。
+一个可以直接下载使用的 DSH 工作区：`.dsh/skills/` 放技能，`.dsh/bundles/` 放子代理预设，`.dsh/starter/` 放起项目用的本地脚手架。仓库根就是 `.dsh` 的上级目录，下载到目标位置后 DSH 直接加载，不需要再复制、再安装。
 
 ## 当前状态
 
-- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.6.0`。
-- 5 个技能、1 个预设包在版本控制内，装好即用，整包不到 1 MB。
+- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.7.0`。
+- 5 个技能、1 个预设包、1 个脚手架底座在版本控制内，整包约 5 MB。
 - 5 个技能都有明确许可证，公开分发没有阻塞项，见 [NOTICE.md](NOTICE.md)。
 - 四个 PPT 类技能体积过大、拖垮下载，已移出分发，见 [SKILLS.md](SKILLS.md)。
 
@@ -22,10 +22,19 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 ```text
 <项目路径>\.dsh\
 ├── skills\      5 个技能，含各自的脚本与依赖
-└── bundles\     fde-presets 子代理预设
+├── bundles\     fde-presets 子代理预设
+└── starter\     liquid-glass-starter 脚手架底座（Bun + Hono + Drizzle + React）
 ```
 
 不用 clone、不用打包、不用二次复制。全局安装、单个技能、更新与卸载见 [INSTALL.md](INSTALL.md)。
+
+## 起一个项目
+
+1. 在新工作区里装好之后，先跑一次 `node scripts/bootstrap.mjs`：检查 bun、在 `.dsh/starter/liquid-glass-starter` 里 `bun install` 并 `bun run check`。没装 bun 就先装 bun，`bun run check` 全绿之前不要开工。
+2. 新建会话，选预设 **FDE 主控**，一句话说需求。
+3. 技能先出理解卡和提案卡让人审定，再往下走采集表、PRD、原型、spec、封版、切片、逐单实现与验收。
+
+完整说明见 [AGENTS.md](AGENTS.md)。
 
 ## 目录结构
 
@@ -38,7 +47,9 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 │   │   ├── token-budget/
 │   │   ├── ponytail/
 │   │   └── rea-video/
-│   └── bundles/fde-presets/ DSH 子代理预设（fde-lead / fde-worker / fde-qa）
+│   ├── bundles/fde-presets/ DSH 子代理预设（fde-lead / fde-worker / fde-qa）
+│   └── starter/liquid-glass-starter/  本地脚手架底座
+├── AGENTS.md                工作区说明：先装再开工
 ├── SKILLS.md                技能索引
 ├── skills.json              机器可读清单：版本、许可、上游、指纹
 ├── scripts/                 校验、索引生成、临时目录清理
@@ -48,7 +59,7 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 ├── archive/                 归档文档与已移出分发的技能（不进版本库）
 ├── deliverables/            交付产物（不进版本库）
 ├── tools/                   本地工具（不进版本库）
-└── .dsh/ 下其他目录          会话、备份等运行数据（不进版本库）
+└── .dsh/ 下其他目录          会话、备份、运行数据（不进版本库）
 ```
 
 ## 技能清单
@@ -57,7 +68,7 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 
 | 技能 | 版本 | 许可证 | 上游 |
 | --- | --- | --- | --- |
-| `all-in-fde` | 0.2.2 | MIT | 自研（入口技能） |
+| `all-in-fde` | 0.6.0 | MIT | 自研（入口技能） |
 | `ai-flavor-guard` | 0.1.1 | MIT | 本地自研 |
 | `token-budget` | 0.3.0 | MIT | 自研（预算层） |
 | `ponytail` | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
@@ -96,7 +107,7 @@ node scripts/check-public-artifacts.mjs  # 对外产物里不许有内网地址�
 
 ## 临时产物
 
-所有中间产物统一放 `.tmp/`，不进版本库，可以整目录清空：
+所有中间产物统一放 `.tmp/`（技能在它自己的工作区里用 `.fde-tmp/`），都不进版本库，可以整目录清空：
 
 ```powershell
 node scripts/clean-tmp.mjs                    # 先看有哪些、占多大
