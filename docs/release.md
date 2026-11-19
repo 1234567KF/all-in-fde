@@ -5,7 +5,7 @@
 ## 1 许可证
 
 - [ ] `ai-flavor-guard` 补 `LICENSE`，或在公开前删除该目录。
-- [ ] `dashi-ppt` 拿到授权后保留许可证文件；拿不到就从仓库删除，本地留档在 `archive/`。
+- [x] `dashi-ppt` 未授权，已于 2026-11-19 用 `git filter-repo` 从历史删除；本机留档在 `archive/skills/`。
 - [ ] `guizang-ppt` 保留 AGPL-3.0 全文与版权声明，`NOTICE.md` 已写明约束。
 - [ ] `ppt-master`、`html-ppt` 保留各自 `LICENSE` 与版权头。
 - [ ] 仓库根 `LICENSE` 与 `NOTICE.md` 的口径一致。

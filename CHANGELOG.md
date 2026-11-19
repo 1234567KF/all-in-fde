@@ -4,6 +4,18 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.6.1] - 2026-11-19
+
+### Removed
+
+- `dashi-ppt` 从全部 git 历史中删除（`git filter-repo --invert-paths`）。它没有许可证，不应继续存在于公开仓库的任何版本里。
+
+### Notes
+
+- 历史重写导致**所有提交哈希与标签改写**。已有 clone 必须重新 clone，不能 `git pull`。
+- 本机仓库从 57.5 MiB 降到 36.3 MiB；`dashi-ppt` 仍留档在 `archive/skills/`，不进版本库。
+- GitHub 的缓存与已有 fork 可能仍留有旧对象，彻底清除需联系 GitHub Support。
+
 ## [0.6.0] - 2026-11-19
 
 ### Added

@@ -14,16 +14,16 @@
 
 ## 已移出分发（4 个）
 
-体积大（合计约 170 MB，其中 `dashi-ppt` 的 `node_modules` 约 62 MB），会让 `giget` 下载不稳定，已从 `.dsh/skills/` 移出，本机留档在 `archive/skills/`，来源信息见 `docs/skills/*.json` 与历史提交：
+体积大（合计约 170 MB，其中 `dashi-ppt` 的 `node_modules` 约 62 MB），会让 `giget` 下载不稳定，已从 `.dsh/skills/` 移出。三个有许可的留档在本机 `archive/skills/`，元数据见 `docs/skills/*.json`；`dashi-ppt` 没有许可证，除本机留档外已从 git 历史中删除。
 
 | 技能 | 版本 | 许可证 | 上游 |
 | --- | --- | --- | --- |
-| `dashi-ppt` | 0.4.14 | 未声明 | 本地安装包 |
+| `dashi-ppt` | 0.4.14 | 未声明 | 本地安装包（已从历史删除） |
 | `guizang-ppt` | 0.1.0 | AGPL-3.0 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) |
 | `html-ppt` | 0.1.0 | MIT | [lewislulu/html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) |
 | `ppt-master` | 6.9.0 | MIT | [hugohe3/ppt-master](https://github.com/hugohe3/ppt-master) |
 
-前三个从上游装回即可；`dashi-ppt` 没有上游地址，需要时从 `git show v0.4.0:.dsh/skills/dashi-ppt` 取回对应文件。
+需要时从上游装回前三个即可；`dashi-ppt` 没有上游地址，也不再随仓库或历史分发。
 
 ## 每个目录里的文件
 

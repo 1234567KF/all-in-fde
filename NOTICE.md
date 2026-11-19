@@ -16,18 +16,22 @@
 
 ## 已移出分发的技能
 
-`dashi-ppt`、`guizang-ppt`、`html-ppt`、`ppt-master` 因为体积过大（合计约 170 MB）已从 `.dsh/skills/` 移出，本机留档在 `archive/skills/`，不进版本库。它们仍存在于 git 历史（`v0.4.0` 及更早）里。
+`dashi-ppt`、`guizang-ppt`、`html-ppt`、`ppt-master` 因为体积过大（合计约 170 MB）已从 `.dsh/skills/` 移出，本机留档在 `archive/skills/`，不进版本库。
 
 | 技能 | 许可证 | 处理 |
 | --- | --- | --- |
-| `ppt-master` 6.9.0 | MIT | 需要时按上游重新安装 |
-| `html-ppt` 0.1.0 | MIT | 需要时按上游重新安装 |
-| `guizang-ppt` 0.1.0 | AGPL-3.0 | 需要时按上游重新安装，**保持 AGPL 独立授权**，不能并入仓库 MIT |
-| `dashi-ppt` 0.4.14 | 未声明 | **无授权**，不应再分发；只保留在本机与 git 历史中 |
+| `ppt-master` 6.9.0 | MIT | 需要时按上游重新安装；仍在 git 历史中 |
+| `html-ppt` 0.1.0 | MIT | 需要时按上游重新安装；仍在 git 历史中 |
+| `guizang-ppt` 0.1.0 | AGPL-3.0 | 需要时按上游重新安装，**保持 AGPL 独立授权**；仍在 git 历史中 |
+| `dashi-ppt` 0.4.14 | 未声明 | **无授权**；已于 2026-11-19 用 `git filter-repo` 从全部历史中删除 |
 
 `guizang-ppt` 这部分的约束：若重新引入，要保留许可证全文与版权声明；对它的修改按 AGPL 提供源码；不能当作 MIT 内容再分发。
 
-若要从公开历史里彻底抹掉 `dashi-ppt`，需要用 `git filter-repo` 重写历史；在此之前，之前推上去的副本仍可能留在 GitHub 缓存和已有 fork 里，删除当前提交只是止损，不是彻底抹除。
+## 历史重写说明
+
+2026-11-19 为清除 `dashi-ppt`，用 `git filter-repo` 重写了全部提交，所有提交哈希与标签都已改变。此前 clone 过本仓库的人需要重新 clone，不能靠 `git pull` 或 `git rebase` 跟上。
+
+GitHub 侧的限制：重写后旧提交不再被任何分支或标签引用，但可能在一段时间内仍可从 GitHub 的缓存或已有 fork 中访问。要彻底清除缓存需要联系 GitHub Support；已经存在的 fork 不受影响。
 
 ## 版本依据
 
