@@ -21,7 +21,12 @@ const valueOf = (name) => {
 const remove = has('--remove');
 const dryRun = has('--dry-run');
 const home = resolve(valueOf('--home') || process.env.DSH_COST_HOME || join(homedir(), '.dsh', 'dsh-cost'));
-const link = join(repoRoot, '.dsh', 'skills', 'token-budget');
+
+// 技能是否已经躺在某个 .dsh/skills 下（下载即用的常见形态）。是的话它就是运行时，不需要再建联接。
+const skillParent = dirname(skillRoot);
+const skillGrand = dirname(skillParent);
+const inPlace = basename(skillParent) === 'skills' && basename(skillGrand) === '.dsh';
+const link = inPlace ? skillRoot : join(repoRoot, '.dsh', 'skills', 'token-budget');
 
 const SOURCE_CANDIDATES = [join(repoRoot, 'tools', 'dsh-cost'), join(skillRoot, 'vendor', 'dsh-cost')];
 
@@ -32,6 +37,10 @@ function findSource() {
 }
 
 function removeLink() {
+  if (inPlace) {
+    console.log(`技能就在运行时目录 ${skillRoot}，没有可移除的联接`);
+    return;
+  }
   if (!existsSync(link)) {
     console.log('没有需要移除的技能联接');
     return;
@@ -72,9 +81,7 @@ function installDshCost(source) {
 }
 
 function linkSkill() {
-  const parent = dirname(skillRoot);
-  const grand = dirname(parent);
-  if (basename(parent) === 'skills' && basename(grand) === '.dsh') {
+  if (inPlace) {
     console.log(`技能已在 ${skillRoot} 就位，跳过联接`);
     return;
   }
@@ -100,7 +107,7 @@ function main() {
   if (dryRun) {
     console.log(`dsh-cost 源：${source}`);
     console.log(`安装到：${home}`);
-    console.log(`技能联接：${link}`);
+    console.log(inPlace ? `技能位置：${skillRoot}（就位，不需联接）` : `技能联接：${link}`);
     return;
   }
   installDshCost(source);

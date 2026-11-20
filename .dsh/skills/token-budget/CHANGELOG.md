@@ -1,5 +1,11 @@
 # 变更记录
 
+## [0.4.1] - 2026-11-20
+
+### Fixed
+
+- `scripts/install.mjs`：技能已经位于 `.dsh/skills` 时（`giget` 下载即用的形态），dry-run 会把联接目标算成嵌套的 `.dsh/.dsh/skills/token-budget`。改为识别「已就位」，dry-run 直接打印技能位置，`--remove` 也不会误删运行时目录。
+
 ## [0.4.0] - 2026-11-20
 
 ### Added
