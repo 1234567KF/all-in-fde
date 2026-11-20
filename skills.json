@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "totalSkills": 5,
   "totalFiles": 109,
-  "totalBytes": 639660,
+  "totalBytes": 641997,
   "skills": [
     {
       "name": "ai-flavor-guard",
@@ -62,15 +62,15 @@
     },
     {
       "name": "token-budget",
-      "version": "0.4.1",
+      "version": "0.4.2",
       "license": "MIT",
       "redistributable": true,
       "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify/stat；统计时生成当前工作空间 dashboard；依赖 dsh-cost，可免克隆安装。可脱离 all-in-fde 独立使用（选 fde-budget 预设）。",
       "entry": "SKILL.md",
       "upstream": null,
       "files": 40,
-      "bytes": 225284,
-      "sha256": "967bf1b00c84e5f3403a583cc4e294320323e2926667580fb5c27fdddb0fe60b"
+      "bytes": 227621,
+      "sha256": "9479541b084cd940f5c2b834f71d3463d4a69465253ca0d8a609f1a893d52a0d"
     }
   ]
 }

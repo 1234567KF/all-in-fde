@@ -3,10 +3,17 @@
   "version": "2026-11-20",
   "displayCurrency": "CNY",
   "_todo": [
-    "qwen-token-plan-individual 全部单价为【占位估算值】，请从套餐控制台核实后覆盖：hit=缓存命中, miss=未命中, write=写入, output=输出，单位 元/百万 tokens",
-    "MiniMax-M2.7-highspeed 单价为【占位估算值】，请核实",
+    "qwen-token-plan-individual 是套餐 provider，官方原价只能作参考：qwen3.8-flash / qwen3.8-max / qwen3.6-flash 的 _reference 里记了阿里云百炼原价（USD），套餐实收价需登录套餐控制台核对后覆盖",
+    "MiniMax-M2.7 / M2.7-highspeed：官方定价页已不再列出 M2.7（疑似下线），现价按聚合站美元价折人民币，仍需控制台确认",
+    "cache hit（缓存命中）单价：除 DeepSeek、MiniMax、GLM 官方明示的以外，其余按输入价比例估算",
     "定稿后把本数组清空并把 version 改成实际生效日期"
   ],
+  "_sources": {
+    "deepseek": { "url": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing", "fetchedAt": "2026-11-20" },
+    "minimax-cn": { "url": "https://platform.minimax.cn/docs/pricing/overview", "fetchedAt": "2026-11-20" },
+    "zai-glm": { "url": "https://docs.z.ai/guides/overview/pricing", "fetchedAt": "2026-11-20" },
+    "aliyun-qwen": { "url": "https://www.alibabacloud.com/help/zh/model-studio/model-pricing", "fetchedAt": "2026-11-20" }
+  },
   "fx": {
     "CNY": 1,
     "USD": 7.1,
@@ -57,19 +64,20 @@
           "idle": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 }
         },
         "MiniMax-M2.7": {
-          "label": "MiniMax-M2.7（国内·待核实）",
+          "label": "MiniMax-M2.7（官方页已下架·据聚合站折算）",
           "currency": "CNY",
           "billing": "token",
-          "peak": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
-          "idle": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
-          "_needVerify": true
+          "peak": { "hit": 0.42, "miss": 2.1, "write": 0, "output": 8.4 },
+          "idle": { "hit": 0.42, "miss": 2.1, "write": 0, "output": 8.4 },
+          "_needVerify": true,
+          "_note": "M2.7 已不在 platform.minimax.cn 定价页（疑似下线）。数值按聚合站 $0.30 in / $1.20 out / $0.06 cache read 乘 7.1 折算；write 按 MiniMax 不计缓存写入填 0。"
         },
         "MiniMax-M2.7-highspeed": {
-          "label": "MiniMax-M2.7 高速档（待核实）",
+          "label": "MiniMax-M2.7 高速档（官方页已下架）",
           "currency": "CNY",
           "billing": "token",
-          "peak": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
-          "idle": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
+          "peak": { "hit": 0.42, "miss": 2.1, "write": 0, "output": 8.4 },
+          "idle": { "hit": 0.42, "miss": 2.1, "write": 0, "output": 8.4 },
           "_needVerify": true
         },
         "MiniMax-M3": {
@@ -109,36 +117,39 @@
     "qwen-token-plan-individual": {
       "models": {
         "qwen3.8-flash": {
-          "label": "Qwen3.8-Flash（套餐价·待核实）",
-          "currency": "CNY",
+          "label": "Qwen3.8-Flash（官方原价·CN 华北2）",
+          "currency": "USD",
           "billing": "token",
-          "peak": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
-          "idle": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
-          "_needVerify": true
+          "peak": { "hit": 0.0113, "miss": 0.113, "write": 0.141, "output": 0.382 },
+          "idle": { "hit": 0.0113, "miss": 0.113, "write": 0.141, "output": 0.382 },
+          "_needVerify": true,
+          "_note": "阿里云百炼 2026-11-20 原价：输入 $0.113、输出 $0.382（每百万 tokens，华北2）。缓存按官方说明命中 10%、显式创建 125% 估算。套餐实收价可能不同。"
         },
         "qwen3.8-max": {
-          "label": "Qwen3.8-Max（套餐价·待核实）",
-          "currency": "CNY",
+          "label": "Qwen3.8-Max（官方原价·CN 华北2）",
+          "currency": "USD",
           "billing": "token",
-          "peak": { "hit": 0.3, "miss": 3.0, "write": 0, "output": 12.0 },
-          "idle": { "hit": 0.3, "miss": 3.0, "write": 0, "output": 12.0 },
-          "_needVerify": true
+          "peak": { "hit": 0.165, "miss": 1.65, "write": 2.06, "output": 4.951 },
+          "idle": { "hit": 0.165, "miss": 1.65, "write": 2.06, "output": 4.951 },
+          "_needVerify": true,
+          "_note": "阿里云百炼 2026-11-20 原价：输入 $1.650、输出 $4.951（每百万 tokens，华北2）。缓存按 10% / 125% 估算。"
         },
         "qwen3.6-flash": {
-          "label": "Qwen3.6-Flash（套餐价·待核实）",
-          "currency": "CNY",
+          "label": "Qwen3.6-Flash（官方原价·CN 华北2）",
+          "currency": "USD",
           "billing": "token",
-          "peak": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
-          "idle": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
-          "_needVerify": true
+          "peak": { "hit": 0.0165, "miss": 0.165, "write": 0.206, "output": 0.99 },
+          "idle": { "hit": 0.0165, "miss": 0.165, "write": 0.206, "output": 0.99 },
+          "_needVerify": true,
+          "_note": "阿里云百炼 2026-11-20 原价：输入 $0.165、输出 $0.99（≤256K，华北2）；>256K 另有档位，暂未建模。"
         },
         "glm-5.2": {
-          "label": "GLM-5.2（套餐价·待核实）",
-          "currency": "CNY",
+          "label": "GLM-5.2（官方原价）",
+          "currency": "USD",
           "billing": "token",
-          "peak": { "hit": 0.2, "miss": 2.0, "write": 0, "output": 8.0 },
-          "idle": { "hit": 0.2, "miss": 2.0, "write": 0, "output": 8.0 },
-          "_needVerify": true
+          "peak": { "hit": 0.26, "miss": 1.4, "write": 0, "output": 4.4 },
+          "idle": { "hit": 0.26, "miss": 1.4, "write": 0, "output": 4.4 },
+          "_note": "Z.AI 官方 2026-11-20：输入 $1.4、缓存命中 $0.26、输出 $4.4（每百万 tokens）。缓存存储限时免费，故 write=0。"
         },
         "deepseek-v4-pro-0813": {
           "label": "DeepSeek-V4-Pro-0813（套餐转发·待核实）",
@@ -146,10 +157,11 @@
           "billing": "token",
           "peak": { "hit": 0.3, "miss": 9.0, "write": 0, "output": 27.0 },
           "idle": { "hit": 0.15, "miss": 4.5, "write": 0, "output": 13.5 },
-          "_needVerify": true
+          "_needVerify": true,
+          "_note": "套餐转发的 pro 模型，D2 按 DeepSeek 官方 2026-11-20 价填（v4-pro：高峰 9/27、空闲 4.5/13.5）。套餐实收价可能不同。"
         }
       },
-      "_note": "该 provider 为 token 套餐，不分峰谷，peak 与 idle 相同。deepseek-v4-pro-0813 是套餐里转发的 pro 模型，单价按 deepseek-account 同款填（仍需核实）。"
+      "_note": "该 provider 为 token 套餐，不分峰谷，peak 与 idle 相同。三个 qwen 模型与 glm-5.2 已改用官方原价（USD）作为基准，套餐实收价需登录控制台核对。"
     },
     "*": {
       "models": {}

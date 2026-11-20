@@ -2,7 +2,7 @@
 name: token-budget
 description: Token 预算与节省策略。用户说“统计 / 看计费 / 看板”，或提到 token-budget、省 token、预算、成本、节省，或 all-in-fde 任务开始/收尾时加载；先判断类型与峰谷，再执行；统计时生成当前工作空间的 dashboard。
 metadata:
-  version: "0.4.1"
+  version: "0.4.2"
 ---
 
 # token-budget

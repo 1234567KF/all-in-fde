@@ -4,6 +4,18 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.8.2] - 2026-11-20
+
+### Changed
+
+- `token-budget` 0.4.2：`pricing.json` 联网核实（DeepSeek / MiniMax M3 / GLM-5.2 / Qwen 3.8·3.6 官方页），新增 `_sources` 记录来源 URL 与抓取日期；Qwen 套餐与 `glm-5.2` 改用官方原价（USD）基准；MiniMax-M2.7 官方页已下架，改按聚合站折算并保留 `_needVerify`。
+
+## [0.8.1] - 2026-11-20
+
+### Fixed
+
+- `token-budget` 0.4.1：`scripts/install.mjs` 在技能已位于 `.dsh/skills` 时，dry-run 会算出嵌套的 `.dsh/.dsh/skills/...` 联接路径。改为识别「已就位」，dry-run 只打印技能位置，`--remove` 不误删运行时目录。
+
 ## [0.8.0] - 2026-11-20
 
 ### Added
