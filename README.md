@@ -1,17 +1,42 @@
-# 技能库
+# all-in-fde 技能库
 
-一个可以直接下载使用的 DSH 工作区：`.dsh/skills/` 放技能，`.dsh/bundles/` 放子代理预设，`.dsh/starter/` 放起项目用的本地脚手架。仓库根就是 `.dsh` 的上级目录，下载到目标位置后 DSH 直接加载，不需要再复制、再安装。
+一个 DSH 工作区：把一段需求推进到可验收的小型 IT 系统。AI 读完本文件和 [AGENTS.md](AGENTS.md) 即可自主执行，人只在三个触点拍板。
+
+## 给人看：你需要做什么
+
+1. **安装**（一次性）：`npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"`
+2. **启动 watch**（一次性，后台跑）：`node tools/dsh-cost/bin/dsh-cost.mjs watch`
+3. **核实定价表里的占位单价**（一次性）：打开 `tools/dsh-cost/pricing.json`，搜 `_needVerify`，从各平台控制台填真实值，然后 `node .dsh/skills/token-budget/scripts/sync-vendor.mjs`
+
+之后所有命令由 AI 自动执行。你只需要在以下三个时刻做决定：
+
+| 触点 | AI 给你什么 | 你做什么 |
+| --- | --- | --- |
+| 理解卡 / 提案卡 | HTML 卡片 + 问题清单 | 确认方向、回答疑问 |
+| 采集表审定 | xlsx + 核验戳脚本结果 | 逐条审定、盖章 |
+| 票面走查 | 切片后的任务票 | 调整优先级、批准并行 |
+
+其余步骤（PRD、spec、封版、实现、验收、看板）AI 按技能流程自动推进。说"统计"或"看板"即出计费面板。
+
+## 给 AI 看：首次进入怎么做
+
+读 [AGENTS.md](AGENTS.md)。它会告诉你：
+
+- 怎么判断是否已安装、怎么一键 bootstrap
+- 怎么起新项目（选 FDE 主控预设，一句话说需求）
+- 计费技能的自动触发时机
+- 改动边界（哪些能改、哪些不能改）
+
+**不要让人敲命令**。除了上面"给人看"的三步，其余操作你自己执行。
 
 ## 当前状态
 
-- 远端：<https://github.com/1234567KF/all-in-fde>，已公开，分支 `main`，标签到 `v0.7.0`。
-- 5 个技能、1 个预设包、1 个脚手架底座在版本控制内，整包约 5 MB。
-- 5 个技能都有明确许可证，公开分发没有阻塞项，见 [NOTICE.md](NOTICE.md)。
-- 四个 PPT 类技能体积过大、拖垮下载，已移出分发，见 [SKILLS.md](SKILLS.md)。
+- 远端：<https://github.com/1234567KF/all-in-fde>，分支 `main`，标签到 `v0.8.0`
+- 5 个技能、1 个预设包、1 个脚手架底座，整包约 5 MB
+- 许可证见 [NOTICE.md](NOTICE.md)，公开分发无阻塞项
+- 4 个 PPT 类技能体积过大已移出分发，见 [SKILLS.md](SKILLS.md)
 
 ## 安装
-
-一条命令，落到目标项目根目录：
 
 ```powershell
 npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
@@ -21,113 +46,123 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 
 ```text
 <项目路径>\.dsh\
-├── skills\      5 个技能，含各自的脚本与依赖
+├── skills\      5 个技能（含脚本与 vendor 依赖）
 ├── bundles\     fde-presets 子代理预设
-└── starter\     liquid-glass-starter 脚手架底座（Bun + Hono + Drizzle + React）
+└── starter\     liquid-glass-starter 脚手架底座
 ```
 
-不用 clone、不用打包、不用二次复制。全局安装、单个技能、更新与卸载见 [INSTALL.md](INSTALL.md)。
+不用 clone、不用打包、不用二次复制。全局安装与卸载见 [INSTALL.md](INSTALL.md)。
 
-## 起一个项目
-
-1. 在新工作区里装好之后，先跑一次 `node scripts/bootstrap.mjs`：检查 bun、在 `.dsh/starter/liquid-glass-starter` 里 `bun install` 并 `bun run check`。没装 bun 就先装 bun，`bun run check` 全绿之前不要开工。
-2. 新建会话，选预设 **FDE 主控**，一句话说需求。
-3. 技能先出理解卡和提案卡让人审定，再往下走采集表、PRD、原型、spec、封版、切片、逐单实现与验收。
-
-完整说明见 [AGENTS.md](AGENTS.md)。
-
-## 目录结构
-
-```text
-.
-├── .dsh/
-│   ├── skills/              技能本体，一个技能一个目录
-│   │   ├── all-in-fde/      入口技能
-│   │   ├── ai-flavor-guard/
-│   │   ├── token-budget/
-│   │   ├── ponytail/
-│   │   └── rea-video/
-│   ├── bundles/fde-presets/ DSH 子代理预设（fde-lead / fde-worker / fde-qa）
-│   └── starter/liquid-glass-starter/  本地脚手架底座
-├── AGENTS.md                工作区说明：先装再开工
-├── SKILLS.md                技能索引
-├── skills.json              机器可读清单：版本、许可、上游、指纹
-├── scripts/                 校验、索引生成、临时目录清理
-├── docs/                    技能规范、版本策略、发布清单、已移出技能的元数据
-├── .github/                 PR 模板与 CI 校验
-├── .tmp/                    临时产物，可整目录清空（不进版本库）
-├── archive/                 归档文档与已移出分发的技能（不进版本库）
-├── deliverables/            交付产物（不进版本库）
-├── tools/                   本地工具（不进版本库）
-└── .dsh/ 下其他目录          会话、备份、运行数据（不进版本库）
-```
+> **注意**：`skills.json` 和 `SKILLS.md` 是仓库级索引文件，供开发时的校验脚本使用。giget 只拉 `.dsh/` 目录，这两个文件不会被下载到用户机器上。
 
 ## 技能清单
 
-`giget` 下载的是这 5 个：
-
 | 技能 | 版本 | 许可证 | 上游 |
 | --- | --- | --- | --- |
-| `all-in-fde` | 0.6.0 | MIT | 自研（入口技能） |
+| `all-in-fde` | 0.7.0 | MIT | 自研（入口技能） |
 | `ai-flavor-guard` | 0.1.1 | MIT | 本地自研 |
-| `token-budget` | 0.3.0 | MIT | 自研（预算层） |
+| `token-budget` | 0.4.0 | MIT | 自研（预算层） |
 | `ponytail` | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
 | `rea-video` | 0.1.0 | Apache-2.0 | [JuneYaooo/rea-video](https://github.com/JuneYaooo/rea-video) |
 
 `dashi-ppt`、`guizang-ppt`、`html-ppt`、`ppt-master` 不随下载分发，原因与找回方式见 [SKILLS.md](SKILLS.md)。
 
-## 为什么只有一份
+## 目录结构
 
-仓库里只有 `.dsh/skills/` 一份技能，没有 `skills/` 之类的源码副本，也没有 `dist/` 打包产物：
+```text
+all-in-fde/                              # 仓库根 = .dsh 上级，giget 下载即用
+├── .dsh/
+│   ├── skills/                          # 技能本体（运行时唯一一份）
+│   │   ├── all-in-fde/                  # 入口技能 v0.7.0
+│   │   │   ├── SKILL.md                 # 路由：角色、先读现场、七动作
+│   │   │   ├── META.json                # 版本/许可/上游的唯一真源
+│   │   │   ├── references/              # 九个动作细则，用到才加载
+│   │   │   │   ├── understand.md        # 收活·理解卡+提案卡
+│   │   │   │   ├── intake.md            # 收活·出采集表
+│   │   │   │   ├── spec.md              # PRD→spec→封版（含固定专题）
+│   │   │   │   ├── slice.md             # 切片与派发
+│   │   │   │   ├── scaffold.md          # 起架：脚手架坐标契约
+│   │   │   │   ├── implement.md         # 逐单实现+自测+证据
+│   │   │   │   ├── verify.md            # 验收：复核+冷启动+E2E
+│   │   │   │   ├── delivery.md          # 交付三件套+retro
+│   │   │   │   ├── checklist.md         # 五道阻断门+31条ID
+│   │   │   │   └── starter-map.md       # 脚手架对照+禁区清单
+│   │   │   ├── scripts/                 # 执法器（agent 只调用不代写）
+│   │   │   └── assets/                  # 模板件（采集表/spec骨架/PRD清单）
+│   │   ├── token-budget/                # 预算层 + vendor/dsh-cost
+│   │   ├── ponytail/                    # 最小改动纪律
+│   │   ├── ai-flavor-guard/             # 中文去 AI 味
+│   │   └── rea-video/                   # 视频逆向拆解
+│   ├── bundles/fde-presets/             # fde-lead / fde-worker / fde-qa / fde-budget
+│   └── starter/liquid-glass-starter/    # 本地脚手架底座
+├── AGENTS.md                            # AI 工作区说明（必读）
+├── README.md                            # 本文件
+├── SKILLS.md / skills.json              # 仓库级索引（giget 不拉）
+├── scripts/                             # 仓库级校验（giget 不拉）
+├── tools/                               # 本地工具如 dsh-cost（gitignored）
+└── docs/                                # 规范与方案文档
 
-- 改技能就是改运行时，不存在「改了一边忘了另一边」；
-- 下载即部署，不需要同步脚本、提交钩子或安装器；
-- 依赖跟着技能走：`token-budget` 自带 `vendor/dsh-cost`，`giget` 下载完直接能跑。
-
-运行时临时装的、不属于本仓库的技能（例如 `graphify`）在 `.gitignore` 里按名字排除，不会混进提交。
-
-## 常用命令
-
-需要 Node.js 18 及以上，以及一个可用的 `git`：
-
-```powershell
-git status
-git log --oneline --decorate
-git tag -n
+# 跑一次交付后，目标工作区长这样（与上面互不重叠）：
+<项目工作区>/
+├── .fde/                                # 正式产物，进版本库
+│   ├── brief.md                         # 五节需求摘要
+│   ├── starter.json                     # 脚手架坐标
+│   ├── prd.md 或 prd/                   # 一级真源
+│   ├── spec/<module>.md + 固定专题      # 二级真源
+│   ├── tickets/<票号>-<slug>.md          # 任务票
+│   ├── cards/E6-*.md                    # 人填验收卡
+│   ├── evidence/E*-*.json               # 脚本/卡片产出的证据
+│   └── handoff/ retro.md
+└── .fde-tmp/                            # 截图/日志/草稿，随时可删
 ```
 
-校验与索引：
+**三条规则**（比树本身更重要）：
+
+1. **依赖方向**：`SKILL.md` 只做路由；`references/` 是动作细则，用到才加载；`scripts/` 是执法器，agent 只调用不代写产物；`assets/` 是模板不是产物。
+2. **两个临时目录**：仓库根 `.tmp/` 给仓库开发用；工作区根 `.fde-tmp/` 给每次交付用，由 `ensure-tmp.mjs` 写进 `.git/info/exclude`，绝不改对方 `.gitignore`。
+3. **`.fde/` vs `.fde-tmp/`**：前者是交付物与证据（进版本库、可回溯），后者是调试残留（收尾前确认 `git ls-files .fde-tmp` 为空）。
+
+## 为什么只有一份
+
+仓库里只有 `.dsh/skills/` 一份技能，没有源码副本或 dist 产物：
+
+- 改技能就是改运行时，不存在"改了一边忘了另一边"
+- 下载即部署，不需要同步脚本或安装器
+- 依赖跟着技能走：`token-budget` 自带 `vendor/dsh-cost`，下载完直接能跑
+
+## 开发者命令
+
+以下命令面向**修改本仓库的开发者**，不是给用户用的。AI 在改完技能后自动执行校验，不需要人敲。
+
+需要 Node.js ≥ 18 和 git。
 
 ```powershell
+# 校验
 node scripts/check-skills.mjs            # 元数据与索引一致性
 node scripts/sync-index.mjs              # 重新生成 skills.json
 node scripts/check-links.mjs             # Markdown 相对链接
-node scripts/check-public-artifacts.mjs  # 对外产物里不许有内网地址、本机路径
+node scripts/check-public-artifacts.mjs  # 对外产物无内网地址/本机路径
+
+# 计费
+node tools/dsh-cost/bin/dsh-cost.mjs watch    # 启动增量同步（后台）
+node tools/dsh-cost/bin/dsh-cost.mjs status   # 检查 watch 状态
+node .dsh/skills/token-budget/scripts/sync-vendor.mjs  # pricing.json 改完同步到 vendor
+
+# 清理
+node scripts/clean-tmp.mjs               # 查看临时产物
+node scripts/clean-tmp.mjs --all         # 全部清空
 ```
-
-## 临时产物
-
-所有中间产物统一放 `.tmp/`（技能在它自己的工作区里用 `.fde-tmp/`），都不进版本库，可以整目录清空：
-
-```powershell
-node scripts/clean-tmp.mjs                    # 先看有哪些、占多大
-node scripts/clean-tmp.mjs --all              # 全部删掉，保留 README
-node scripts/clean-tmp.mjs --older-than 7     # 只删 7 天前的
-node scripts/clean-tmp.mjs --legacy --all     # 连根目录旧式 .tmp-* 一起清
-```
-
-定时清理的写法见 [.tmp/README.md](.tmp/README.md)。
 
 ## 新增或更新技能
 
-1. 在 `.dsh/skills/` 下按 [docs/skill-spec.md](docs/skill-spec.md) 建目录，至少放 `SKILL.md`、`META.json`、`PROVENANCE.md`、`CHANGELOG.md` 四个文件。
-2. 改 `SKILL.md` 的 `name` 和 `description`，`META.json` 的版本号、许可证、上游。
-3. 在 `CHANGELOG.md` 顶部加一条同版本号的记录。
-4. 跑 `node scripts/check-skills.mjs`、`node scripts/check-links.mjs`、`node scripts/check-public-artifacts.mjs`，再跑 `node scripts/sync-index.mjs`。
-5. 提交，格式见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+1. 在 `.dsh/skills/` 下按 [docs/skill-spec.md](docs/skill-spec.md) 建目录
+2. 放 `SKILL.md`、`META.json`、`PROVENANCE.md`、`CHANGELOG.md`
+3. 改版本号、许可证、上游
+4. 跑校验四件套 + `sync-index.mjs`
+5. 提交，格式见 [CONTRIBUTING.md](CONTRIBUTING.md)
 
-技能目录必须自包含：需要外部依赖的，把依赖放进技能自己的子目录（例如 `token-budget/vendor/dsh-cost`），不要引用仓库外的路径——别人只下载 `.dsh/` 时，仓库其他部分不在场。
+技能目录必须自包含：外部依赖放进技能子目录（如 `vendor/`），不引用仓库外路径。
 
 ## 许可证
 
-仓库根的 [LICENSE](LICENSE)（MIT）只覆盖自写文件：文档、脚本、CI 配置，以及各技能目录下新增的 `META.json`、`PROVENANCE.md`、`CHANGELOG.md`。`.dsh/skills/` 里的技能本体沿用各自目录内的许可证，详见 [NOTICE.md](NOTICE.md)。
+仓库根 [LICENSE](LICENSE)（MIT）覆盖自写文件。`.dsh/skills/` 里的技能沿用各自目录内的许可证，详见 [NOTICE.md](NOTICE.md)。

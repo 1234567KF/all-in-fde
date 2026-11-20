@@ -26,7 +26,8 @@
 
 - 采集表已生成（按档填完，轻量档缺的表在 S15 记理由）；
 - brief.md 五节齐全；
-- S0 至少一条原文，且是用户原话。
+- S0 至少一条原文，且是用户原话；
+- **核验戳脚本通过**：`node scripts/check-review-stamp.mjs <xlsx> --sheets S0,S3,S5,S7,S13` 退出 0。
 
 ## 常见错
 

@@ -140,6 +140,25 @@ for (const f of files) {
         }
       }
     }
+
+    // E5-2 squeeze 软检：日志超 200 行建议压缩（WARN，不阻断）
+    const e52sq = byId('E5-2');
+    if (e52sq) {
+      const logs = (e52sq.evidence || [])
+        .map(evPath)
+        .filter((p) => existsSync(p) && /\.(log|txt)$/i.test(p));
+      for (const logPath of logs) {
+        try {
+          const lines = readFileSync(logPath, 'utf8').split('\n').length;
+          if (lines > 200) {
+            const squeezed = logPath.replace(/\.(log|txt)$/i, '.squeezed.$1');
+            if (!existsSync(squeezed)) {
+              warn(`${f}: E5-2 引用的日志 ${logPath} 有 ${lines} 行但未压缩；建议用 squeeze.mjs 压缩后贴压缩版`);
+            }
+          }
+        } catch {}
+      }
+    }
   }
 
   const itemModes = new Set((e.items || []).map((i) => i.mode));

@@ -8,9 +8,11 @@
 
 ## 怎么做
 
-1. **交付三件套**：README（装与起）、部署说明、回滚说明。打包压缩的临时件放 `.fde-tmp/`，交付物本身放交付目录。只照 README 能起来才算，不靠「我记得」。
+1. **计费看板（必做）**：`node <token-budget>/scripts/stat.mjs`，present 生成的 dashboard.html。**没出看板不许交付**——人需要知道这次花了多少。
+2. **A/B 成本对比（条件触发）**：如果本项目 `.fde/tickets/` 下 ≥3 张票带了 `#task=` 标签，且 `tools/dsh-cost/bench/judgments.json` 的 `judgments` 非空，跑一次 `node <token-budget>/scripts/verify.mjs --task "<票号>"` 看成本趋势。不满足条件时跳过，不报错。
+3. **交付三件套**：README（装与起）、部署说明、回滚说明。打包压缩的临时件放 `.fde-tmp/`，交付物本身放交付目录。只照 README 能起来才算，不靠「我记得」。
    - **README 必须是项目自己的**：脚手架生成的 README 通常叫模板名（如 `yimatong-spike`），不能当交付说明；要改成项目名 + 装/起/端口/账号/回滚五段。
-2. **干净目录复跑**（E7）：用脚本复制到**项目外**的新目录，**不带依赖、不带数据库、不带 .git**：
+4. **干净目录复跑**（E7）：用脚本复制到**项目外**的新目录，**不带依赖、不带数据库、不带 .git**：
 
 ```bash
 node scripts/e7-fresh-copy.mjs --src . --run
@@ -22,11 +24,11 @@ node scripts/e7-fresh-copy.mjs --src . --run
 
    然后按 README 在副本里起服务 → 冒烟 → 验证回滚。任何一步失败即 E7 红，退路是补 README。
    E7-1 的 `observed` 要写副本路径与「不含 node_modules/data/.git」，E7-2 写 install/check 退出码。
-3. **内网坐标扫描**：交付物里无内网地址、账号、令牌路径。用现成扫描器或自写小脚本；没有脚本就人工按 `192.168.`、`10.`、`localhost:`、`token` 逐项搜。三态退出码，SKIP 不等于通过。扫描要排除注释与测试夹具（否则会被示例 IP 误报），但**命中真实配置即红**。
-4. **临时产物不入库**：核对 `git ls-files .fde-tmp` 为空；不为空就 `git rm -r --cached .fde-tmp`，排除规则只写在 `.git/info/exclude`（由 `ensure-tmp.mjs` 写）。
-5. **差异清单**：与客户口径的差异、挂起项、已知问题，逐条含复现方式。
-6. **写证据**：`evidence/E7-*.json`，最后跑 `node scripts/verify-evidence.mjs .fde/evidence --strict`。
-7. **retro**：复盘「哪条证据事后被证明是假的」「哪个坑下次可以挡」，变成一条判据或一道门，写进 `retro.md`。没有可执行改动写「无」，不写感想。`shortcut:` 注释里欠的账汇总进债务台账。
+5. **内网坐标扫描**：交付物里无内网地址、账号、令牌路径。用现成扫描器或自写小脚本；没有脚本就人工按 `192.168.`、`10.`、`localhost:`、`token` 逐项搜。三态退出码，SKIP 不等于通过。扫描要排除注释与测试夹具（否则会被示例 IP 误报），但**命中真实配置即红**。
+6. **临时产物不入库**：核对 `git ls-files .fde-tmp` 为空；不为空就 `git rm -r --cached .fde-tmp`，排除规则只写在 `.git/info/exclude`（由 `ensure-tmp.mjs` 写）。
+7. **差异清单**：与客户口径的差异、挂起项、已知问题，逐条含复现方式。
+8. **写证据**：`evidence/E7-*.json`，最后跑 `node scripts/verify-evidence.mjs .fde/evidence --strict`。
+9. **retro**：复盘「哪条证据事后被证明是假的」「哪个坑下次可以挡」，变成一条判据或一道门，写进 `retro.md`。没有可执行改动写「无」，不写感想。`shortcut:` 注释里欠的账汇总进债务台账。
 
 ## retro 的节奏（v0.4.0 收紧）
 
@@ -40,6 +42,8 @@ node scripts/e7-fresh-copy.mjs --src . --run
 
 ## 什么算完
 
+- **E6 证据存在且 mode=PASS**（含 E2E 真实模式 E6-10）；没有 E6 证据或 E6-10 为 SKIP/FAIL 不许交付。这是 E2E 的自然触发点——verify 阶段必跑，delivery 阶段必检。
+- 计费看板已 present（步骤 1）；
 - 干净目录 README 复跑成功（副本路径可追）；
 - 回滚可复现；
 - 无未登记的 FAIL 或已知问题；

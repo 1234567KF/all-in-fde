@@ -11,22 +11,20 @@ DSH 会话的精准计费与 A/B 验证工具。直接读 `~/.dsh/sessions/**/se
 
 ## 快速开始
 
-以下命令均在 **dsh-cost 目录内**执行（技能自带副本：`.dsh/skills/token-budget/vendor/dsh-cost`；独立安装则在 `~/.dsh/dsh-cost`）。在别的工作区用 `token-budget` 技能时，它会自动解析到已安装目录，无需手敲路径。
-
 ```powershell
 # 1. 增量同步（可反复跑，只读新增/变化的会话）
-node bin/dsh-cost.mjs sync
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs sync
 
 # 2. 总账
-node bin/dsh-cost.mjs report
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs report
 
 # 3. 单会话逐轮
-node bin/dsh-cost.mjs session a244ad2e
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs session a244ad2e
 
 # 4. 子代理成本树 / 技能成本 / 任务账本
-node bin/dsh-cost.mjs tree
-node bin/dsh-cost.mjs skills
-node bin/dsh-cost.mjs tasks
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs tree
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs skills
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs tasks
 ```
 
 输出都是 Markdown，直接贴文档或转 PPT。加 `--out 文件.md` 存盘。
@@ -63,7 +61,7 @@ node ...\dsh-cost.mjs dashboard
 看板是**单文件静态 HTML**，不需要启动服务。如果打开后没有数据，通常是所在预览器不执行 JavaScript；用浏览器直接打开：
 
 ```powershell
-start "" "reports\dashboard.html"
+start "" "D:\all-in-fde\tools\dsh-cost\reports\dashboard.html"
 ```
 
 最省事的是双击 `tools\dsh-cost\刷新看板.cmd`：本地 `sync + dashboard` 后自动用浏览器打开，**不调用模型、不产生 token**。
@@ -94,17 +92,17 @@ node ...\dsh-cost.mjs scope --all
 登录 Windows 后自动在后台同步（当前用户，无需管理员）：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\install-autostart.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\all-in-fde\tools\dsh-cost\scripts\install-autostart.ps1"
 ```
 
 它注册计划任务 `DSH-Cost-Watch`：登录 30 秒后启动，每 60 秒增量同步一次，文件变化后 3 秒再补一次。
 
 ```powershell
 # 看最近一次同步时间和结果
-node bin/dsh-cost.mjs status
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs status
 
 # 移除自启（不删账本）
-powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\uninstall-autostart.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\all-in-fde\tools\dsh-cost\scripts\uninstall-autostart.ps1"
 ```
 
 开销：每轮只 stat 30 个会话文件、解压变化的那个，约 0.1 秒；不调用模型，不产生 token。
@@ -157,8 +155,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\uninstall-autostart
 # 基线： #task=doc-01 #arm=A #run=1
 # 候选： #task=doc-01 #arm=B #run=1
 
-node bin/dsh-cost.mjs compare --task doc-01 --base A --cand B
-node bin/dsh-cost.mjs compare --task doc-01 --judgments bench\judgments.json
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs compare --task doc-01 --base A --cand B
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs compare --task doc-01 --judgments bench\judgments.json
 ```
 
 判定规则（写死在 `src/ab.mjs`）：
@@ -179,14 +177,14 @@ node bin/dsh-cost.mjs compare --task doc-01 --judgments bench\judgments.json
 
 ```powershell
 # 先看会删什么、起点是哪
-node bin/dsh-cost.mjs reset --dry-run
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset --dry-run
 
 # 从当前会话开始（含本会话已产生的调用）
-node bin/dsh-cost.mjs reset
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset
 
 # 从指定时刻开始（此刻归零，本会话此前的调用也不计）
-node bin/dsh-cost.mjs reset --at now
-node bin/dsh-cost.mjs reset --at 2026-11-18T12:00:00+08:00
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset --at now
+node D:\all-in-fde\tools\dsh-cost\bin\dsh-cost.mjs reset --at 2026-11-18T12:00:00+08:00
 ```
 
 `reset` 会：

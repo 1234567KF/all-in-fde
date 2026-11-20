@@ -1,5 +1,18 @@
 # 变更记录
 
+## [0.4.0] - 2026-11-20
+
+### Added
+
+- **`fde-budget` 预设**（随 `@local/dsh-fde-presets` v0.2.0 安装）：脱离 all-in-fde 的通用会话也能触发省流纪律——非平凡任务开工跑 plan、派子代理先出 brief、长日志先 squeeze、问计费直接出 stat。选「FDE 预算」预设即可。
+- SKILL.md 新增「脱离 all-in-fde 使用」一节，说明两种独立用法与路径注意事项。
+
+### Changed
+
+- pricing.json 补全 qwen-token-plan-individual（qwen3.8-flash/max、glm-5.2、qwen3.6-flash、deepseek-v4-pro-0813）与 minimax-cn M2.7/highspeed；unknown 从 27.7% 降到 0%。占位单价标 `_needVerify` 待核实。
+- classifyTask：「做/建 + 系统/平台/模块」判为 code，修复 IT 需求误判 doc。
+- plan 输出新增 `suggestDefer` 字段（高峰时提示可推迟，不自动建定时任务）。
+
 ## [0.3.0] - 2026-11-19
 
 ### Added

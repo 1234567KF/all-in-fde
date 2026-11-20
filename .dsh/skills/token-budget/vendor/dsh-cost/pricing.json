@@ -1,7 +1,12 @@
 {
   "_note": "v2 多 provider 价格表。单价单位：token 模型=元或美元/百万 tokens；media=元或美元/张。改价只需改这里，历史 token/张数不变，金额重算。",
-  "version": "2026-11-18",
+  "version": "2026-11-20",
   "displayCurrency": "CNY",
+  "_todo": [
+    "qwen-token-plan-individual 全部单价为【占位估算值】，请从套餐控制台核实后覆盖：hit=缓存命中, miss=未命中, write=写入, output=输出，单位 元/百万 tokens",
+    "MiniMax-M2.7-highspeed 单价为【占位估算值】，请核实",
+    "定稿后把本数组清空并把 version 改成实际生效日期"
+  ],
   "fx": {
     "CNY": 1,
     "USD": 7.1,
@@ -51,6 +56,22 @@
           "peak": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
           "idle": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 }
         },
+        "MiniMax-M2.7": {
+          "label": "MiniMax-M2.7（国内·待核实）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
+          "idle": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
+          "_needVerify": true
+        },
+        "MiniMax-M2.7-highspeed": {
+          "label": "MiniMax-M2.7 高速档（待核实）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
+          "idle": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 },
+          "_needVerify": true
+        },
         "MiniMax-M3": {
           "label": "MiniMax-M3（≤512k 五折档）",
           "currency": "CNY",
@@ -84,6 +105,51 @@
           "idle": { "hit": 0.06, "miss": 0.3, "write": 0.375, "output": 1.2 }
         }
       }
+    },
+    "qwen-token-plan-individual": {
+      "models": {
+        "qwen3.8-flash": {
+          "label": "Qwen3.8-Flash（套餐价·待核实）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
+          "idle": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
+          "_needVerify": true
+        },
+        "qwen3.8-max": {
+          "label": "Qwen3.8-Max（套餐价·待核实）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.3, "miss": 3.0, "write": 0, "output": 12.0 },
+          "idle": { "hit": 0.3, "miss": 3.0, "write": 0, "output": 12.0 },
+          "_needVerify": true
+        },
+        "qwen3.6-flash": {
+          "label": "Qwen3.6-Flash（套餐价·待核实）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
+          "idle": { "hit": 0.1, "miss": 1.0, "write": 0, "output": 4.0 },
+          "_needVerify": true
+        },
+        "glm-5.2": {
+          "label": "GLM-5.2（套餐价·待核实）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.2, "miss": 2.0, "write": 0, "output": 8.0 },
+          "idle": { "hit": 0.2, "miss": 2.0, "write": 0, "output": 8.0 },
+          "_needVerify": true
+        },
+        "deepseek-v4-pro-0813": {
+          "label": "DeepSeek-V4-Pro-0813（套餐转发·待核实）",
+          "currency": "CNY",
+          "billing": "token",
+          "peak": { "hit": 0.3, "miss": 9.0, "write": 0, "output": 27.0 },
+          "idle": { "hit": 0.15, "miss": 4.5, "write": 0, "output": 13.5 },
+          "_needVerify": true
+        }
+      },
+      "_note": "该 provider 为 token 套餐，不分峰谷，peak 与 idle 相同。deepseek-v4-pro-0813 是套餐里转发的 pro 模型，单价按 deepseek-account 同款填（仍需核实）。"
     },
     "*": {
       "models": {}

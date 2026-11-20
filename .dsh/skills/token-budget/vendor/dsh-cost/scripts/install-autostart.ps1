@@ -1,6 +1,6 @@
 # Register a per-user logon task that starts the local DSH cost watcher.
 # Usage (normal PowerShell, no admin required):
-#   powershell -NoProfile -ExecutionPolicy Bypass -File "<dsh-cost目录>\scripts\install-autostart.ps1"
+#   powershell -NoProfile -ExecutionPolicy Bypass -File "D:\all-in-fde\tools\dsh-cost\scripts\install-autostart.ps1"
 $ErrorActionPreference = 'Stop'
 $taskName = 'DSH-Cost-Watch'
 $root = Split-Path -Parent $PSScriptRoot

@@ -4,6 +4,18 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.8.0] - 2026-11-20
+
+### Added
+
+- `all-in-fde` 0.7.0：PRD 分卷模式规范化（7 个横切卷 + 端×域纵切卷、SSOT 声明、HOLD 编号），spec 阶段 C 固定三份专题 `data-model.md` / `api-map.md` / `glossary.md`，新增 `assets/prd-split-manifest.md` 模板。
+- `token-budget` 0.4.0：新增 `fde-budget` 预设（`@local/dsh-fde-presets` 0.2.0），脱离 all-in-fde 的会话也能用省流纪律；pricing 补全 qwen 与 minimax 单价，unknown 占比从 27.7% 降到 0%。
+- `AGENTS.md` 新增「省流与计费」一节：开工 plan、派子代理先 brief、长日志先 squeeze、统计直接出看板，跨工作区生效。
+
+### Changed
+
+- `verify-evidence.mjs` 等门禁脚本随流程调整；`vendor/dsh-cost` 同步到最新（含 dashboard、turns、scope）。
+
 ## [0.7.0] - 2026-11-20
 
 ### Added

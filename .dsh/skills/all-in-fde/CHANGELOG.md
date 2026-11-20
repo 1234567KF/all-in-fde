@@ -1,5 +1,19 @@
 # 变更记录
 
+## [0.7.0]
+
+**PRD/spec 章节模式与数据设计补位**（来自营销模块实战反馈）：
+
+- **P0-1 spec 固定专题**（`spec.md` 阶段C 步骤13）：新增 `data-model.md`（逐列定义+索引+迁移计划）、`api-map.md`（全量路由×权限码×schema）、`glossary.md`（编号族速查+易混词）。与业务模块 spec 并列生成、并列审定、并列封版。裁决顺序：物理列名看 data-model，业务口径指回 S8/S9，冲突改 data-model 不改采集表。
+- **P0-2 PRD 分卷模式规范化**（`spec.md` 阶段B 步骤6）：重写为双模式（单文件 / 分卷）。分卷模式吸收真实多端项目验证过的结构：7 个固定横切卷（00-decisions / 01-roles / 02-flows / 03-ia-pages / 08-rules / 09-acceptance / 10-delivery-openitems）+ 端×域纵切卷。配套 SSOT 声明、HOLD 编号、每卷管/不管声明。新增 `assets/prd-split-manifest.md` 模板。
+- **P0-3 变更传播链**（`spec.md` 阶段D 步骤18）：新增 `scripts/prd-impact.mjs`，grep spec/tickets 中的章节或编号，输出受影响文件清单。封版后改 PRD 必须先跑它。spec 元信息新增机器可读字段 `prd_refs`。
+- **P1-4 核验戳脚本执法**（`spec.md` 阶段A 步骤3、`intake.md` 出口判据）：新增 `scripts/check-review-stamp.mjs`，校验采集表 xlsx 指定 sheet 的「客户核验」列。阶段 A→B 门禁从「AI 自认为审过」变成「脚本说审过」。
+- **P1-5 UI 事实源裁决块**（`spec.md` 步骤12 模板 §4）：spec 模板 §4 固定三行裁决块（业务展示口径=S7；视觉=DESIGN.md+packages/ui；冲突时前者赢业务后者赢呈现）。
+- **P1-6 spec 覆盖率核验**（`spec.md` 阶段C 步骤16、阶段D 步骤19）：新增 `scripts/spec-coverage.mjs`，AC/BR/REQ/页面双向差集报告，差集非空不许封版。新增 `assets/spec-skeleton.md` 六节模板。
+- **P2-8 保留字清单**（`spec.md` 阶段C 步骤11）：data-model / api-map / glossary / INDEX 为固定专题专用名，业务模块不得使用。
+- **checklist.md E2.5 增强**：固定专题 sealed + spec-coverage 差集为空纳入封版检查项。
+- **scripts/README.md**：新增 prd-impact / check-review-stamp / spec-coverage 三个脚本条目。
+
 ## [0.6.0]
 
 **12 步流水线 + liquid-glass 理解卡 + 六个人审触点**：

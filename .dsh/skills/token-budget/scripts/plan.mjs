@@ -80,6 +80,9 @@ export async function buildPlan({ task, type, now = Date.now(), files = [], cont
       squeeze: `node "${join(skillRoot, 'scripts', 'squeeze.mjs')}" "<日志或JSON文件>" --level medium --out "<压缩文件>"`,
       verify: `node "${join(skillRoot, 'scripts', 'verify.mjs')}" --task "<#task 标签>"`,
     },
+    suggestDefer: peak.peak
+      ? { action: 'schedule_create', reason: `当前高峰（${peak.label}），可推迟到 ${peak.nextIdle} 后低谷执行以省约 50% 成本`, nextIdle: peak.nextIdle }
+      : null,
   };
 }
 
@@ -92,6 +95,7 @@ function renderMarkdown(plan) {
   lines.push(`- 模型/effort：${plan.model} / ${plan.effort}（${plan.modelNote}）`);
   lines.push(`- 读取策略：${plan.readStrategy}`);
   if (plan.contextWarning) lines.push(`- 上下文提醒：${plan.contextWarning}`);
+  if (plan.suggestDefer) lines.push(`- ⏰ 省流建议：${plan.suggestDefer.reason}（可用 schedule_create 推迟）`);
   lines.push(`- 子代理：${plan.subagents ? '建议使用' : '非必需'}；返回上限 ${plan.maxReturn} tokens`);
   lines.push(`- 压缩：${plan.compression}`);
   lines.push(`- 预算参考：约 ${plan.budget.turns} 轮${plan.budget.estimate === null ? '' : ` × ${formatMoney(plan.budget.costPerTurn)} ≈ ${formatMoney(plan.budget.estimate)}`}`);

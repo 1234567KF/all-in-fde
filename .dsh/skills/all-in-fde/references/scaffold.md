@@ -20,7 +20,7 @@ node <技能目录>/scripts/starter-info.mjs --check-reach # 顺带探测可达�
 1. `<工作区>/.fde/starter.json` —— 项目级，随项目走
 2. `~/.dsh/all-in-fde/starter.json` —— 本机级，团队默认
 3. 环境变量 `FDE_STARTER_JSON` —— 指向任意 JSON
-4. **本技能自带的仓库副本** `.dsh/starter/liquid-glass-starter` —— 前三个都没有时自动使用，开箱即用、零配置
+4. **本技能自带的完整副本** `.dsh/starter/liquid-glass-starter` —— 前三个都没有时自动使用，开箱即用、零配置。该副本是可直接修改的完整源码，需要定制时直接改即可。
 
 坐标必须含：`name`、`scaffoldCmd`、`moduleCmd`、`checkCmd`；`localPath` 或 `repo` 二选一（有 `localPath` 就用本机完整副本，运行期零网络）；远程取法再加 `fetch.git` 或 `fetch.archive`；多端再加 `webAppsCmd`。
 

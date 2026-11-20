@@ -2,7 +2,7 @@
 name: token-budget
 description: Token 预算与节省策略。用户说“统计 / 看计费 / 看板”，或提到 token-budget、省 token、预算、成本、节省，或 all-in-fde 任务开始/收尾时加载；先判断类型与峰谷，再执行；统计时生成当前工作空间的 dashboard。
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # token-budget
@@ -72,6 +72,15 @@ node "<Base directory>/scripts/stat.mjs"
 ```
 
 入口负责选领域技能（all-in-md、PPT、编码）；本技能负责预算、验收和统计，不改入口的流程。
+
+## 脱离 all-in-fde 使用（任何会话）
+
+本技能不依赖 all-in-fde。两种独立用法：
+
+1. **选预设「FDE 预算」**（`fde-budget`）：persona 内置省流纪律——非平凡任务开工自动跑 plan、派子代理先出 brief、长日志先 squeeze、问计费直接出 stat。普通问答/调研/文档任务都适用。
+2. **手动调用**：任何会话里说「统计」「看计费」「看板」，或提到省 token / 预算 / 成本，本技能按上方「统计 / 看板」一节直接执行，不需要流程上下文。
+
+注意：plan/brief/squeeze 是脚本，路径以技能 Base directory 为准；`fde-budget` 预设里的路径写死为 `~/.dsh/skills/token-budget/scripts/...`（全局联接位置）。技能装在别处时用实际 Base directory。
 
 ## 红线
 

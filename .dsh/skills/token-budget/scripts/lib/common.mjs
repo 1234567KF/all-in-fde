@@ -72,6 +72,8 @@ export function formatMoney(value) {
 export function classifyTask(text) {
   const value = String(text || '');
   if (/ppt|幻灯片|演示文稿|演示|课件|deck|slides?|汇报材料/i.test(value)) return 'ppt';
+  // IT 系统/平台/模块开发优先于文档（"做个合同审批系统"是 code 不是 doc）
+  if (/(?:做|建|开发|实现|搭建|写|弄|搞).*(?:系统|平台|应用|模块|功能|页面|后台|管理|crm|erp|oa|saas|工具)/i.test(value) || /(?:系统|平台|应用|模块|功能|页面|后台).*(?:做|建|开发|实现|搭建|写|弄|搞)/i.test(value)) return 'code';
   if (/标书|专利|软著|团标|申报|白皮书|合同|文档|审阅|审核|扩写|润色|改写|校对|一致性|docx|word|报告/i.test(value)) return 'doc';
   if (/代码|开发|编程|游戏|unity|unreal|ue[45]|接口|api|bug|测试|重构|架构|数据库|前端|后端|脚本|部署/i.test(value)) return 'code';
   if (/调研|研究|对比|选型|竞品|文献|综述/i.test(value)) return 'research';
