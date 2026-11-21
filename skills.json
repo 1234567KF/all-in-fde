@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "totalSkills": 5,
-  "totalFiles": 109,
-  "totalBytes": 641997,
+  "totalFiles": 110,
+  "totalBytes": 669405,
   "skills": [
     {
       "name": "ai-flavor-guard",
@@ -18,15 +18,15 @@
     },
     {
       "name": "all-in-fde",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "license": "MIT",
       "redistributable": true,
       "description": "把一段需求推进到可验收的小型 IT 系统：理解卡 → 提案卡 → 采集表(核验戳) → PRD(分卷) → 原型 → spec(含固定专题) → 覆盖率核验 → 封版 → 切片 → 逐票实现 → 验收 → 交付。12 步流水线，6 个人审触点。",
       "entry": "SKILL.md",
       "upstream": null,
-      "files": 34,
-      "bytes": 221838,
-      "sha256": "bc0d14fbbd984b30266dc5c6516a948bf5a583450df1f63c89dd0efbecb53d3a"
+      "files": 35,
+      "bytes": 249246,
+      "sha256": "250f450e5c92f353a2adbd3a229011eb0c43d415fa95bdedbbfa1fcfc6c03dab"
     },
     {
       "name": "ponytail",

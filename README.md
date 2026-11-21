@@ -59,7 +59,7 @@ npx giget@latest gh:1234567KF/all-in-fde "<项目路径>"
 
 | 技能 | 版本 | 许可证 | 上游 |
 | --- | --- | --- | --- |
-| `all-in-fde` | 0.7.0 | MIT | 自研（入口技能） |
+| `all-in-fde` | 0.7.1 | MIT | 自研（入口技能） |
 | `ai-flavor-guard` | 0.1.1 | MIT | 本地自研 |
 | `token-budget` | 0.4.0 | MIT | 自研（预算层） |
 | `ponytail` | 5.3.3 | MIT | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |

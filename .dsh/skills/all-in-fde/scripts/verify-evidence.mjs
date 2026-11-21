@@ -13,6 +13,9 @@
  *    脚本产出的 E6 里 E6-9 只能是 SKIP 或 FAIL，不许 PASS。
  *  - 一条门一个文件：同 gate+target 多份且 revision 相同 → 重复证据。
  *    默认只是 WARN（兼容历史），加 --strict 变 ERROR（交付/CI 用）。
+ *
+ * v0.7.1 起把 E2.5 封版门纳入执法：识别 E2.5-*.json 与 5 个 item ID，
+ *  gate=PASS 必须带封版人签名（signature.by），堵住「未封版也过 --strict」。
  */
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { join, resolve, isAbsolute } from 'node:path';
@@ -28,6 +31,7 @@ const evPath = (p) => (isAbsolute(p) ? p : resolve(process.cwd(), p));
 
 const GATE_IDS = {
   E0: ['E0-1', 'E0-2', 'E0-3', 'E0-4', 'E0-5', 'E0-6'],
+  'E2.5': ['E2.5-1', 'E2.5-2', 'E2.5-3', 'E2.5-4', 'E2.5-5'],
   E5: ['E5-1', 'E5-2', 'E5-3', 'E5-4', 'E5-5', 'E5-6', 'E5-7', 'E5-8', 'E5-9'],
   E6: ['E6-1', 'E6-2', 'E6-3', 'E6-4', 'E6-5', 'E6-6', 'E6-7', 'E6-8', 'E6-9', 'E6-10'],
   E7: ['E7-1', 'E7-2', 'E7-3', 'E7-4', 'E7-5', 'E7-6'],
@@ -44,7 +48,7 @@ if (!existsSync(target)) {
   process.exit(0);
 }
 
-const files = readdirSync(target).filter((f) => /^E[0567]-.+\.json$/.test(f)).sort();
+const files = readdirSync(target).filter((f) => /^E(?:[0567]|2\.5)-.+\.json$/.test(f)).sort();
 if (files.length === 0) {
   console.log(`证据目录为空：${target}`);
   process.exit(0);
@@ -65,7 +69,7 @@ for (const f of files) {
   }
   const gate = e.gate;
   if (!GATE_IDS[gate]) {
-    err(`${f}: gate 不是 E0/E5/E6/E7`);
+    err(`${f}: gate 不是 E0/E2.5/E5/E6/E7`);
     continue;
   }
   for (const k of REQUIRED_ENVELOPE) {
@@ -96,6 +100,17 @@ for (const f of files) {
     }
     if (card && card.mode === 'PASS' && (kind === 'card' || kind === 'human') && !e.signature?.by) {
       err(`${f}: E6-9 判 PASS 但没有点选人签名`);
+    }
+  }
+
+  // E2.5 封版门：需求对齐权归人，封版必须有具名封版人（v0.7.1 起脚本执法）
+  if (gate === 'E2.5') {
+    if (e.mode === 'PASS' && !e.signature?.by) {
+      err(`${f}: E2.5 判 PASS 但没有封版人签名（signature.by）；封版是人的决策，不许脚本自封`);
+    }
+    const coverage = (e.items || []).find((i) => i.id === 'E2.5-5');
+    if (coverage && coverage.mode === 'PASS' && !coverage.observed) {
+      warn(`${f}: E2.5-5 判 PASS 但无 observed；应附 spec-coverage 差集报告摘要或 S15 豁免理由`);
     }
   }
 

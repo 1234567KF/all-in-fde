@@ -4,6 +4,22 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.9.0] - 2026-11-21
+
+### Added
+
+- `all-in-fde` 0.7.1：E2.5 封版门纳入脚本执法（识别 `E2.5-*.json` 与 5 个 item，PASS 必须带封版人签名，脚本不许自封）；「人的三处」改写为「人的三类触点」，与 12 步流水线对齐；新增 `assets/prd-template.md` PRD 结构模板（519 行，含单文件与分卷两种落点）。
+- `docs/dsh-minimax-motionharness-安装教程.md`：DSH + MiniMax 图像插件 + MotionHarness 的安装教程（人操作版 + AI 代理版）。
+
+### Changed
+
+- checklist 标题「四道阻断门」改为「五道阻断门」，检查项 31 → 36。
+
+### Removed
+
+- 删掉 `.fde/prd-template.md`：与技能资产里的同名文件重复，且是旧版（少一处章节映射修正）。`.fde/` 是项目正式产物目录，不该在技能库里留副本。
+- 6 张 `images/minimax-*.jpg` 是生成测试图、没有任何文档引用，移到 `.tmp/generated-images/`（不进版本库）。
+
 ## [0.8.2] - 2026-11-20
 
 ### Changed

@@ -1,6 +1,6 @@
 {
   "name": "all-in-fde",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "entry": "SKILL.md",
   "description": "把一段需求推进到可验收的小型 IT 系统：理解卡 → 提案卡 → 采集表(核验戳) → PRD(分卷) → 原型 → spec(含固定专题) → 覆盖率核验 → 封版 → 切片 → 逐票实现 → 验收 → 交付。12 步流水线，6 个人审触点。",
   "license": "MIT",
