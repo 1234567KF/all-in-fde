@@ -501,10 +501,10 @@ const html = `<!DOCTYPE html>
     <h2><span class="icon">✅</span> 下一步行动</h2>
     <p>请审阅以上理解，直接回复修改意见或说「确认」进入提案阶段。</p>
     <p>确认后我将生成粗提案卡供您审定。</p>
-    ${data.estimate ? `<div class="est">预估：${esc(data.estimate)}</div>` : ''}
+    ${data.estimate ? `<div class="est">报价参考（人工产能口径，仅供报价，非 AI 工时）：${esc(data.estimate)}</div>` : ''}
   </div>
 
-  <div class="foot">all-in-fde v0.6.0 · liquid-glass design · ${esc(new Date().toLocaleString('zh-CN'))}</div>
+  <div class="foot">all-in-fde v0.7.2 · liquid-glass design · ${esc(new Date().toLocaleString('zh-CN'))}</div>
 </div>
 </body>
 </html>`;

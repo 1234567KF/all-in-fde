@@ -4,6 +4,14 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循语义化版本。
 
+## [0.9.1] - 2026-11-23
+
+### Changed
+
+- `all-in-fde` 0.7.2：提案卡的「预估工作量」改为报价参考口径（1 人天 ≈ 10 个简单 CRUD 模块或 3 个复杂模块，向上取整到 0.5 天），明确 AI 实现不按人天估时排期；修复 `understand.md` 指向不存在的 `gen-proposal-card.mjs` 的悬空引用。
+- `token-budget` 0.4.3：修预算模式报「未安装」——全局 `~/.dsh/skills` 缺 token-budget 联接；`fde-budget` 预设（presets 0.2.1）把 `node ~/.dsh/...` 改为 `node "$HOME/.dsh/..."`（PowerShell 不展开字面 `~`），并加全局 → 工作区 → 技能目录的回退链。
+- README 技能表版本对齐。
+
 ## [0.9.0] - 2026-11-21
 
 ### Added

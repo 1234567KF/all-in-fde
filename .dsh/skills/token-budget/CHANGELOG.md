@@ -1,5 +1,13 @@
 # 变更记录
 
+## [0.4.3] - 2026-11-23
+
+### Fixed
+
+- **预算模式报「token-budget 未安装」**：全局技能目录 `~/.dsh/skills/` 缺 token-budget 联接（只有 all-in-fde 有），已补建 junction 指向仓库技能目录；doctor/plan 经全局路径实测退出 0。
+- **fde-budget 预设路径写法**（随 `@local/dsh-fde-presets` v0.2.1）：persona 里 `node ~/.dsh/...` 改为 `node "$HOME/.dsh/..."`——PowerShell 不给原生命令展开字面 `~`，照抄必失败；`$HOME` 在 PowerShell/bash 都展开。新增回退链：全局路径 → 工作区 `.dsh/skills/token-budget` → 技能 Base directory。
+- SKILL.md「脱离 all-in-fde 使用」路径注意事项同步更新。
+
 ## [0.4.2] - 2026-11-20
 
 ### Changed

@@ -180,11 +180,12 @@
             config:
               prefix: |-
                 You carry the token-budget discipline for every substantive task, whether or not this session uses all-in-fde.
-                At task start (any non-trivial request: coding, design, research, document work), run `node ~/.dsh/skills/token-budget/scripts/plan.mjs --task "<user request verbatim>" --json` once and follow its output: use the returned `effort`, honor `readStrategy`, and if `suggestDefer` is present, tell the user once that deferring to off-peak halves the cost — never schedule anything on their behalf.
-                When dispatching subagents for independent work, generate a brief with `node ~/.dsh/skills/token-budget/scripts/brief.mjs --goal "..." --inputs "..." --max-return 1500` and use it as the subagent prompt instead of free-form instructions.
-                When a command log you would paste into the conversation exceeds ~200 lines, compress it first with `node ~/.dsh/skills/token-budget/scripts/squeeze.mjs <file> --level medium --out <file>.squeezed.log` and reference the compressed version; never compress source code or document prose.
-                When the user asks about cost, tokens, budget, or says 统计 / 看板 / 计费, run `node ~/.dsh/skills/token-budget/scripts/stat.mjs` and present the generated dashboard.html.
-                Red lines: do not compress deliverables or source code; quality outranks savings; if the token-budget scripts are missing, note it once and continue without the discipline.
+                Script path rule: use "$HOME/.dsh/skills/token-budget/scripts/<name>.mjs" ($HOME expands in both PowerShell and bash; never pass a literal ~ to node). If that global path is absent, fall back to "<workspace>/.dsh/skills/token-budget/scripts/<name>.mjs" or the Base directory reported when loading the token-budget skill.
+                At task start (any non-trivial request: coding, design, research, document work), run `node "$HOME/.dsh/skills/token-budget/scripts/plan.mjs" --task "<user request verbatim>" --json` once and follow its output: use the returned `effort`, honor `readStrategy`, and if `suggestDefer` is present, tell the user once that deferring to off-peak halves the cost — never schedule anything on their behalf.
+                When dispatching subagents for independent work, generate a brief with `node "$HOME/.dsh/skills/token-budget/scripts/brief.mjs" --goal "..." --inputs "..." --max-return 1500` and use it as the subagent prompt instead of free-form instructions.
+                When a command log you would paste into the conversation exceeds ~200 lines, compress it first with `node "$HOME/.dsh/skills/token-budget/scripts/squeeze.mjs" <file> --level medium --out <file>.squeezed.log` and reference the compressed version; never compress source code or document prose.
+                When the user asks about cost, tokens, budget, or says 统计 / 看板 / 计费, run `node "$HOME/.dsh/skills/token-budget/scripts/stat.mjs"` and present the generated dashboard.html.
+                Red lines: do not compress deliverables or source code; quality outranks savings; if the token-budget scripts are missing in all fallback locations, note it once and continue without the discipline.
           - id: agent-instructions
             name: '@deepseek-ai/dsh-agent-instructions'
             config:

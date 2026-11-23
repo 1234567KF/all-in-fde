@@ -1,6 +1,6 @@
 {
   "name": "token-budget",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "entry": "SKILL.md",
   "description": "Token 预算与节省策略：判断类型、峰谷和读取策略，提供 plan/brief/squeeze/verify/stat；统计时生成当前工作空间 dashboard；依赖 dsh-cost，可免克隆安装。可脱离 all-in-fde 独立使用（选 fde-budget 预设）。",
   "license": "MIT",
